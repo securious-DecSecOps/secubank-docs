@@ -43,8 +43,17 @@ flowchart LR
     Harbor --> GitOps["GitOps image tag update"]
     GitOps --> Argo["ArgoCD sync"]
     Argo --> K3s["k3s runtime"]
-    K3s --> Runtime["Cilium / Falco / DAST"]
-    Runtime --> Evidence["Evidence & triage"]
+    K3s --> RuntimeControls["Cilium / Falco / DAST"]
+    RuntimeControls --> Evidence["Evidence & triage"]
+
+    classDef source fill:#e0f2fe,stroke:#0284c7,color:#0f172a
+    classDef control fill:#ecfeff,stroke:#0891b2,color:#0f172a
+    classDef gate fill:#fef3c7,stroke:#d97706,color:#0f172a
+    classDef runtime fill:#dcfce7,stroke:#16a34a,color:#0f172a
+    class Dev,Jenkins,Checkout source
+    class Scans,SBOM,Trivy control
+    class Gate gate
+    class Harbor,GitOps,Argo,K3s,RuntimeControls,Evidence runtime
 ```
 
 ## Runtime target architecture
@@ -73,8 +82,9 @@ flowchart TB
       App --> DB
       Cilium --> App
       Falco --> App
-      KubeBench --> Runtime
+      KubeBench --> RuntimeReport["Cluster hardening report"]
       ZAP --> App
+      App --> RuntimeReport
     end
 
     subgraph Triage["DefectDojo VM"]
@@ -83,7 +93,15 @@ flowchart TB
 
     Harbor --> App
     Tools --> DD
-    Runtime --> DD
+    RuntimeReport --> DD
+
+    classDef ci fill:#e0f2fe,stroke:#0284c7,color:#0f172a
+    classDef runtime fill:#dcfce7,stroke:#16a34a,color:#0f172a
+    classDef security fill:#fef3c7,stroke:#d97706,color:#0f172a
+    classDef triage fill:#ede9fe,stroke:#7c3aed,color:#0f172a
+    class Jenkins,Harbor,Sonar,Tools ci
+    class Cilium,ArgoCD,Falco,KubeBench,ZAP,App,DB,RuntimeReport runtime
+    class DD triage
 ```
 
 ## IaC and bootstrap

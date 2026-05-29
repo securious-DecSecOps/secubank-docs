@@ -1,11 +1,38 @@
-# VulnBank MSA — DevSecOps Golden Path
+<section class="hero" markdown>
+<div class="eyebrow">DevSecOps Golden Path PoC</div>
 
-!!! abstract "한 줄 요약"
-    보안 도구를 **많이 붙였다**가 아니라, 금융권 보안담당자가 실제로 겪는 **판단·차단·추적·재평가·증적** 업무를 Kubernetes 파이프라인으로 재현한 PoC. 각 도구는 OWASP Top 10의 특정 레이어를 담당하며, 실제 탐지 결과(CWE/CVE)로 그 역할을 증명한다.
+# VulnBank MSA 보안 파이프라인
+
+보안 도구를 **많이 붙였다**가 아니라, 금융권 보안담당자가 실제로 겪는 **판단·차단·추적·재평가·증적** 업무를 Kubernetes 파이프라인으로 재현한 기술문서다. VulnBank MSA를 기준으로 CI, GitOps, 런타임 보안, 증적 관리가 어디서 어떤 판단을 만드는지 연결한다.
+</section>
+
+<div class="metric-strip" markdown>
+
+<div class="metric" markdown>
+<strong>3 repos</strong>
+<span>CI / GitOps / App source 분리</span>
+</div>
+
+<div class="metric" markdown>
+<strong>6 services</strong>
+<span>VulnBank MSA workload</span>
+</div>
+
+<div class="metric" markdown>
+<strong>5 scan layers</strong>
+<span>SAST, secret, IaC, SBOM, image CVE</span>
+</div>
+
+<div class="metric" markdown>
+<strong>4 vulns</strong>
+<span>DAST ground truth 보존</span>
+</div>
+
+</div>
 
 <div class="grid cards" markdown>
 
--   **아키텍처**
+-   <div class="card-title">:material-hubspot: 아키텍처</div>
 
     ---
 
@@ -13,7 +40,7 @@
 
     [아키텍처 보기 →](architecture.md)
 
--   **CI 보안 파이프라인**
+-   <div class="card-title">:material-shield-search: CI 보안 파이프라인</div>
 
     ---
 
@@ -21,7 +48,7 @@
 
     [파이프라인 보기 →](ci-security-pipeline.md)
 
--   **보안 시나리오**
+-   <div class="card-title">:material-clipboard-text-search: 보안 시나리오</div>
 
     ---
 
@@ -29,7 +56,7 @@
 
     [시나리오 보기 →](security-scenarios.md)
 
--   **탐지 효능 (정탐/오탐)**
+-   <div class="card-title">:material-chart-box: 탐지 효능 (정탐/오탐)</div>
 
     ---
 
@@ -37,7 +64,7 @@
 
     [지표 보기 →](detection-efficacy.md)
 
--   **런타임 보안**
+-   <div class="card-title">:material-radar: 런타임 보안</div>
 
     ---
 
@@ -45,7 +72,7 @@
 
     [런타임 보기 →](runtime-security.md)
 
--   **증적 & Triage**
+-   <div class="card-title">:material-file-document-check: 증적 & Triage</div>
 
     ---
 

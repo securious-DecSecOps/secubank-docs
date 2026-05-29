@@ -1,11 +1,14 @@
 site_name: VulnBank MSA DevSecOps Golden Path
 site_description: 금융권 보안담당자 실무를 Kubernetes 파이프라인으로 재현한 DevSecOps Golden Path PoC
+site_url: https://securious-decsecops.github.io/secubank-docs/
 
 theme:
   name: material
   language: ko
+  logo: assets/brand/logo.svg
+  favicon: assets/brand/favicon.svg
+  font: false
   icon:
-    logo: material/shield-check
     repo: fontawesome/brands/github
   features:
     - navigation.tabs
@@ -15,6 +18,8 @@ theme:
     - navigation.tracking
     - navigation.indexes
     - navigation.footer
+    - navigation.path
+    - content.tabs.link
     - search.suggest
     - search.highlight
     - search.share
@@ -24,23 +29,24 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
-      accent: blue
+      primary: blue grey
+      accent: cyan
       toggle:
         icon: material/weather-night
         name: 다크 모드
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
-      accent: blue
+      primary: blue grey
+      accent: cyan
       toggle:
         icon: material/weather-sunny
         name: 라이트 모드
 
 plugins:
   - search
+  - social
   - mermaid2:
-      javascript: assets/javascripts/mermaid.esm.min.mjs
+      javascript: assets/javascripts/mermaid.min.js
 
 markdown_extensions:
   - admonition
@@ -51,6 +57,7 @@ markdown_extensions:
   - footnotes
   - toc:
       permalink: true
+      toc_depth: 3
   - pymdownx.details
   - pymdownx.highlight:
       anchor_linenums: true
@@ -58,13 +65,22 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.tasklist:
       custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
+          format: !!python/name:pymdownx.superfences.fence_div_format
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  generator: false
 
 nav:
   - 개요: index.md
