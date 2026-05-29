@@ -207,3 +207,51 @@
   .sb-why, .sb-features, .sb-steps, .sb-proof { grid-template-columns: 1fr; }
   .sb-cta .md-button { width: 100%; text-align: center; }
 }
+
+/* ============================================================
+   REFINEMENT — 그라데이션 절제(엔터프라이즈) + 애니메이션
+   (동일 선택자 후순위 override)
+   ============================================================ */
+
+/* hero: 무지개(cyan+indigo) → 단일 청록 글로우 + 미세 노이즈 그리드 */
+.sb-hero__bg {
+  background:
+    radial-gradient(820px 420px at 82% -8%, rgba(45, 212, 191, 0.22), transparent 62%),
+    linear-gradient(165deg, #0a1020 0%, #0c1a2b 55%, #0a2530 100%);
+}
+.sb-grad { background: linear-gradient(90deg, #5eead4, #38bdf8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* 버튼·숫자·아이콘: 무지개 제거 → 절제된 단색 accent */
+.sb-cta .md-button--primary {
+  background: #0e7490; border: 1px solid #0e7490; color: #fff;
+  box-shadow: 0 8px 20px rgba(14, 116, 144, 0.30);
+}
+.sb-cta .md-button--primary:hover { background: #0b5c73; border-color: #0b5c73; transform: translateY(-2px); box-shadow: 0 14px 28px rgba(14, 116, 144, 0.40); }
+.sb-stat__num--accent { background: none; -webkit-background-clip: initial; background-clip: initial; color: var(--md-accent-fg-color); }
+.sb-proof__card span { background: none; -webkit-background-clip: initial; background-clip: initial; color: #5eead4; }
+.sb-steps__n { background: #0e7490; }
+.sb-feature__icon { background: rgba(14, 116, 144, 0.10); }
+[data-md-color-scheme="slate"] .sb-feature__icon { background: rgba(45, 212, 191, 0.12); }
+
+/* 카드 hover: 좀 더 또렷하게(accent 보더 + 살짝 상승) */
+.sb-feature:hover { border-color: rgba(14, 116, 144, 0.55); }
+
+/* ---- 애니메이션: hero 진입 stagger ---- */
+@keyframes sbFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.sb-hero__inner > * { animation: sbFadeUp .7s cubic-bezier(.22,.61,.36,1) both; }
+.sb-hero__inner > .sb-eyebrow   { animation-delay: .02s; }
+.sb-hero__inner > .sb-hero__title { animation-delay: .10s; }
+.sb-hero__inner > .sb-hero__sub  { animation-delay: .20s; }
+.sb-hero__inner > .sb-cta        { animation-delay: .30s; }
+.sb-hero__inner > .sb-badges     { animation-delay: .40s; }
+
+/* ---- 스크롤 리빌(reveal.js가 js-reveal 부여) ---- */
+.js-reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s cubic-bezier(.22,.61,.36,1); }
+.js-reveal.is-visible { opacity: 1; transform: none; }
+
+/* CTA 버튼 미세 인터랙션 */
+.sb-cta .md-button { transition: transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-hero__inner > *, .js-reveal { animation: none !important; opacity: 1 !important; transform: none !important; transition: none !important; }
+}

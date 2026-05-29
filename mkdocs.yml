@@ -83,6 +83,9 @@ extra_css:
   - https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css
   - stylesheets/extra.css
 
+extra_javascript:
+  - javascripts/reveal.js
+
 extra:
   generator: false
 
