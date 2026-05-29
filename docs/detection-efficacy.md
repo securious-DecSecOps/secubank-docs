@@ -43,6 +43,48 @@ AWS CI Build `#3`에서 확인된 정량 값이다.
 | Security Gate | BLOCK |
 | Blocked service count | 6 |
 
+## 정량 지표 정의 (수식)
+
+각 도구의 효능은 단어가 아니라 분류 지표로 표현한다. 분모가 무엇이냐(존재하는 결함 vs 도구가 보고한 것)가 Recall과 Precision을 가른다.
+
+$$
+\text{Recall} = \frac{TP}{TP + FN}, \qquad
+\text{Precision} = \frac{TP}{TP + FP}, \qquad
+\text{FP-rate} = 1 - \text{Precision}
+$$
+
+의도된 4개 취약점(ground truth)을 분모로 한 **계층별 Recall** — 동일 워크로드·동일 인프라에서 측정:
+
+$$
+\text{Recall}_{\text{SAST}} = \frac{0}{0+4} = 0\%
+\qquad\longrightarrow\qquad
+\text{Recall}_{\text{DAST}} = \frac{3}{3+1} = 75\%
+$$
+
+> SAST가 **0/4**, DAST(verify.sh, AWS 라이브)가 **3/4**(음수송금·IDOR·웹쉘 RCE 실제 실행). 나머지 1개(history IDOR)는 스크립트 미포함 → 케이스 추가 시 4/4 목표.
+
+### 계층별 탐지 효능 (SAST vs DAST)
+
+```mermaid
+xychart-beta
+    title "의도 취약점 4개에 대한 탐지 수 (recall 분자)"
+    x-axis ["SAST (정적)", "DAST (동적)"]
+    y-axis "탐지한 취약점 수" 0 --> 4
+    bar [0, 3]
+```
+
+### Trivy 이미지 CVE 심각도 분포 (user-service)
+
+대부분 `php:7.4`(EOL) 베이스 이미지의 OS 패키지 CVE다 — 앱 코드가 아니라 **단일 근본 원인(베이스 이미지)**이 수천 건을 만든다.
+
+```mermaid
+xychart-beta
+    title "Trivy 심각도별 CVE 수 (Build #3, user-service)"
+    x-axis ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+    y-axis "CVE 수" 0 --> 4500
+    bar [29, 1319, 4428, 931]
+```
+
 ## Per-tool evidence with standard references (OWASP / CWE / CVE)
 
 각 도구가 "제 역할을 한다"는 근거를, 실제 Build `#3` 결과에 표준 분류를 매핑해 정리한다. (현재 증적이 확보된 5종)
@@ -84,20 +126,20 @@ AWS CI Build `#3`에서 확인된 정량 값이다.
 - **SAST 의도취약점 recall = 0 / 4.** 단 SAST는 A02(암호/TLS)는 정확히 탐지 → "SAST 무용"이 아니라 "담당 레이어가 다름".
 - **전체 security_rating = D 인데 Quality Gate는 PASS** — 게이트가 `new_security_rating`(신규 코드)만 평가했기 때문. 기본 게이트 정책의 함정.
 - ※ VULN-1·VULN-4는 소스에서 취약 코드 직접 확인(확정 FN), VULN-2·3은 SAST findings에 부재(소스 재확인 TODO).
-- → 이 **0/4를 DAST가 4/4로 메우는 것**이 계층방어의 정량 근거 (DAST 측정은 진행 중).
+- → 이 **0/4를 DAST가 3/4로 메운 것**이 계층방어의 정량 근거 — AWS 라이브에서 음수송금·IDOR·웹쉘 RCE를 실제 요청으로 재현(웹쉘은 프론트엔드 게이트웨이 통해 **실행**까지). 위 [수식·차트](#정량-지표-정의-수식) 참고.
 
 ## Metrics to complete
 
 아래 값은 아직 evidence 기반 라벨링이 완료되지 않았으므로 TODO로 둔다.
 
-| 지표 | 정의 | 현재 상태 |
+| 지표 | 정의 | 현재 값 |
 | --- | --- | --- |
-| Recall | ground truth 취약점 중 탐지된 비율 | TODO |
-| Precision | 탐지 결과 중 실제 조치 대상 비율 | TODO |
-| False positive rate | 오탐 비율 | TODO |
-| False negative list | 놓친 취약점 목록 | TODO |
-| Accepted risk count | 의도적으로 허용한 finding 수 | TODO |
-| VEX status | not affected / affected / fixed 등 | TODO |
+| Recall (SAST) | 의도 취약점 중 SAST 탐지 비율 | **0/4 = 0%** (측정 완료) |
+| Recall (DAST) | 의도 취약점 중 DAST 탐지 비율 | **3/4 = 75%** (AWS 라이브, V2 history IDOR만 미시도) |
+| Precision | 탐지 결과 중 실제 조치 대상 비율 | 트리아지 후 산정 (Hotspot 45·Checkov 30·Trivy 5,776 라벨링 필요) |
+| False negative list | 놓친 취약점 | SAST: V1·V2·V3·V4 전부 / DAST: V2(history IDOR) |
+| Accepted risk count | 의도적으로 허용한 finding | 의도 취약점은 보존 대상 → Accepted-Risk로 등록 (Fixed 금지) |
+| Runtime (Falco/Cilium) | V4 RCE 런타임 탐지·차단 | 룰 배치됨 → DROPPED/이벤트 증적 수집 TODO |
 
 ## Exception workflow
 
