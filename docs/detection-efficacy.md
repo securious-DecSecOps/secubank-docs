@@ -141,16 +141,41 @@ xychart-beta
 | Accepted risk count | 의도적으로 허용한 finding | 의도 취약점은 보존 대상 → Accepted-Risk로 등록 (Fixed 금지) |
 | Runtime (Falco/Cilium) | V4 RCE 런타임 탐지·차단 | 룰 배치됨 → DROPPED/이벤트 증적 수집 TODO |
 
-## Exception workflow
+## 오탐·예외 처리 워크플로 {#exception}
 
-예외 처리는 "무시"가 아니라 근거 있는 상태 전환이어야 한다.
+스캐너가 수천 건을 쏟아내면, 진짜 문제는 "탐지"가 아니라 "그다음"이다. 오탐을 그냥 무시로 닫으면 다음 빌드에서 같은 노이즈가 되살아나고, 위험을 임의로 통과시키면 감사 때 설명할 근거가 없다. 그래서 모든 finding은 닫히기 전에 **근거가 남는 상태 전환**을 거친다. 새 finding이 뜨면 다음 순서로 판단한다.
 
-| 상태 | 의미 | 필요한 근거 |
-| --- | --- | --- |
-| False Positive | 도구가 잘못 탐지 | 재현 불가, 코드 경로 없음, scanner rule 근거 |
-| Accepted Risk | 실제 위험이나 일정 기간 수용 | 영향도, 보완통제, 만료일 |
-| VEX Not Affected | 구성요소는 있으나 취약 코드 경로가 아님 | SBOM component, call path 분석 |
-| Fixed | 수정 완료 | 새 build tag, scan 재실행 결과 |
+```mermaid
+flowchart TD
+    F["새 finding"] --> Q1{"실제로 재현되나?"}
+    Q1 -- 아니오 --> FP["False Positive<br/>룰 ID·재현 불가 근거"]
+    Q1 -- 예 --> Q2{"취약 코드가 실제<br/>실행 경로에 있나?"}
+    Q2 -- 아니오 --> VEX["VEX · Not Affected<br/>SBOM 컴포넌트·call path"]
+    Q2 -- 예 --> Q3{"지금 고칠 수 있나?"}
+    Q3 -- 예 --> FIX["Fixed<br/>재빌드·재스캔으로 확인"]
+    Q3 -- 아니오 --> AR["Accepted Risk<br/>영향도·보완통제·만료일"]
+    classDef q fill:#fef3c7,stroke:#d97706,color:#0f172a
+    classDef fp fill:#e0f2fe,stroke:#0284c7,color:#0f172a
+    classDef risk fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    class Q1,Q2,Q3 q
+    class FP,VEX,FIX fp
+    class AR risk
+```
+
+각 상태는 "무엇을 남기고, 누가 정하고, 언제 다시 보는가"가 정해져 있어야 닫을 수 있다.
+
+| 상태 | 언제 | 남겨야 할 근거 | 결정 | 재검토 |
+| --- | --- | --- | --- | --- |
+| **False Positive** | 도구가 잘못 탐지 | 룰 ID, 재현 불가 로그 | 보안담당자 | 룰 업데이트 시 |
+| **VEX · Not Affected** | 컴포넌트는 있으나 실행 경로가 아님 | SBOM 컴포넌트, call path 분석 | 개발 + 보안 | SBOM 갱신 시 |
+| **Accepted Risk** | 실제 위험이나 기한부 수용 | 영향도, 보완통제, **만료일** | 보안책임자 승인 | 만료일 도래 시 재오픈 |
+| **Fixed** | 수정 완료 | 새 build tag, 재스캔 결과 | 개발 | 회귀 스캔 |
+
+<div class="sb-key" markdown>
+이 PoC의 의도된 4개 취약점은 일부러 살려둔 것이라 **Fixed가 아니라 Accepted Risk(연구 목적, 만료일 없음)** 로 등록한다. 그래야 탐지 효능을 재는 ground truth가 빌드마다 그대로 유지된다. "고치지 않는 것"도 근거가 남는 결정이다.
+</div>
+
+상태는 DefectDojo의 finding lifecycle(Active → Verified / False Positive / Risk Accepted)로 관리하며 dedup·SLA가 함께 붙는다. 현재 import는 동작하고, 상태 라벨링 시연은 [한계 및 향후](limitations.md)에 적은 대로 진행 중이다.
 
 ## Why multiple layers are needed
 
