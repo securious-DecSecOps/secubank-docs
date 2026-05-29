@@ -43,6 +43,49 @@ AWS CI Build `#3`에서 확인된 정량 값이다.
 | Security Gate | BLOCK |
 | Blocked service count | 6 |
 
+## Per-tool evidence with standard references (OWASP / CWE / CVE)
+
+각 도구가 "제 역할을 한다"는 근거를, 실제 Build `#3` 결과에 표준 분류를 매핑해 정리한다. (현재 증적이 확보된 5종)
+
+| 도구 | 실제 탐지 (Build #3) | CWE | OWASP 2021 | 프레임워크 |
+| --- | --- | --- | --- | --- |
+| SonarQube (SAST) | `getstatus.php` TLS 인증서/호스트명 검증 비활성 (rule php:S4830 / php:S5527), 약한 해시·난수 | CWE-295, CWE-297, CWE-328, CWE-338 | A02 Cryptographic Failures | — |
+| Trivy (SCA/image) | base image CVE 29 CRITICAL / 1319 HIGH (예: curl CVE-2023-38545, glibc CVE-2023-4911) | CWE-787, CWE-1104 | A06 Vulnerable & Outdated Components | NVD / CVE |
+| Gitleaks (secrets) | 하드코딩 시크릿 2건 | CWE-798 | A07 Identification & Auth Failures | — |
+| Checkov (IaC) | 컨테이너 root 실행 등 Dockerfile 위반(서비스당 2건) + 30 findings | CWE-250, CWE-732 | A05 Security Misconfiguration | CIS Docker |
+| Kubescape (K8s) | NSA 14/20, MITRE 16/17, CIS 26/33 미준수 컨트롤 | CWE-250, CWE-269 | A05 Security Misconfiguration | NSA / MITRE ATT&CK / CIS |
+
+### OWASP Top 10 커버리지 (도구 선정 근거)
+
+도구는 임의 선택이 아니라 OWASP Top 10을 레이어별로 분담한다 — 단일 도구로는 A01~A08을 덮지 못한다.
+
+| OWASP 2021 | 담당 |
+| --- | --- |
+| A01 Broken Access Control | DAST (IDOR) |
+| A02 Cryptographic Failures | SAST |
+| A03 Injection / A04 Insecure Design | DAST (RCE, 음수 송금) |
+| A05 Security Misconfiguration | Checkov, Kubescape |
+| A06 Vulnerable & Outdated Components | Trivy, SBOM |
+| A07 Identification & Auth Failures | Gitleaks |
+| A08 Software & Data Integrity Failures | SBOM (+ 이미지 서명) |
+| Runtime behavior | Falco, Cilium (MITRE ATT&CK) |
+
+### SAST 측정 결과 — 계층방어의 정량 근거
+
+의도된 4개 취약점에 대한 SonarQube SAST 탐지:
+
+| 의도 취약점 | SAST 결과 | CWE | OWASP | 판정 |
+| --- | --- | --- | --- | --- |
+| 음수 송금 (VULN-1) | 미탐 | CWE-840 / CWE-20 | A04 | FN |
+| 거래내역 IDOR (VULN-2) | 미탐 | CWE-639 | A01 | FN |
+| 회원정보 IDOR (VULN-3) | 미탐 | CWE-639 | A01 | FN |
+| 파일업로드 RCE (VULN-4) | 모호한 permission hotspot만 (RCE 특정 못함) | CWE-434 (→ CWE-94) | A04 / A03 | FN |
+
+- **SAST 의도취약점 recall = 0 / 4.** 단 SAST는 A02(암호/TLS)는 정확히 탐지 → "SAST 무용"이 아니라 "담당 레이어가 다름".
+- **전체 security_rating = D 인데 Quality Gate는 PASS** — 게이트가 `new_security_rating`(신규 코드)만 평가했기 때문. 기본 게이트 정책의 함정.
+- ※ VULN-1·VULN-4는 소스에서 취약 코드 직접 확인(확정 FN), VULN-2·3은 SAST findings에 부재(소스 재확인 TODO).
+- → 이 **0/4를 DAST가 4/4로 메우는 것**이 계층방어의 정량 근거 (DAST 측정은 진행 중).
+
 ## Metrics to complete
 
 아래 값은 아직 evidence 기반 라벨링이 완료되지 않았으므로 TODO로 둔다.

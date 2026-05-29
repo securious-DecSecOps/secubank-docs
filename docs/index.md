@@ -1,27 +1,78 @@
-# Introduction
+# VulnBank MSA — DevSecOps Golden Path
 
-이 문서는 VulnBank MSA DevSecOps Golden Path PoC를 설명한다. 목표는 보안 도구를 많이 붙였다는 사실을 보여주는 것이 아니라, 금융권 보안담당자가 실제로 겪는 판단 흐름을 Kubernetes 배포 파이프라인으로 재현하는 것이다.
+!!! abstract "한 줄 요약"
+    보안 도구를 **많이 붙였다**가 아니라, 금융권 보안담당자가 실제로 겪는 **판단·차단·추적·재평가·증적** 업무를 Kubernetes 파이프라인으로 재현한 PoC. 각 도구는 OWASP Top 10의 특정 레이어를 담당하며, 실제 탐지 결과(CWE/CVE)로 그 역할을 증명한다.
 
-핵심 질문은 다음 네 가지다.
+<div class="grid cards" markdown>
+
+-   **아키텍처**
+
+    ---
+
+    AWS 4-VM 토폴로지 + `개발자 → CI → Harbor → GitOps → 런타임 보안 → 증적` 골든패스 흐름, IaC 부트스트랩.
+
+    [아키텍처 보기 →](architecture.md)
+
+-   **CI 보안 파이프라인**
+
+    ---
+
+    Jenkins 18-stage. shift-left(빌드 전 SAST·secret·IaC, 빌드 후 SBOM·image CVE) → Security Gate → Harbor push.
+
+    [파이프라인 보기 →](ci-security-pipeline.md)
+
+-   **보안 시나리오**
+
+    ---
+
+    상황 → 보안담당자 질문 → 통제 → 증적. 취약 이미지 차단, 신규 CVE 재평가, DAST 비즈로직, 런타임 차단.
+
+    [시나리오 보기 →](security-scenarios.md)
+
+-   **탐지 효능 (정탐/오탐)**
+
+    ---
+
+    도구별 OWASP/CWE/CVE 매핑, 정탐/오탐 지표, 예외처리(FP/Risk Accepted/VEX). SAST 0/4 → 계층방어 근거.
+
+    [지표 보기 →](detection-efficacy.md)
+
+-   **런타임 보안**
+
+    ---
+
+    Cilium/Hubble eBPF, Falco, kube-bench. 제로트러스트(default-deny) + 런타임 RCE 탐지·egress 차단.
+
+    [런타임 보기 →](runtime-security.md)
+
+-   **증적 & Triage**
+
+    ---
+
+    DefectDojo(ASOC 통합), SBOM(CycloneDX/SPDX), 도구 결과 dedup·SLA·triage 흐름.
+
+    [증적 보기 →](evidence-triage.md)
+
+</div>
+
+## 핵심 질문 4가지
 
 | 질문 | 파이프라인에서의 대응 |
 | --- | --- |
-| 이 코드를 배포해도 되는가? | Jenkins CI에서 SAST, secret scan, IaC scan, image scan, SBOM 생성, Security Gate를 수행한다. |
-| 무엇 때문에 막거나 허용했는가? | 도구별 JSON/TXT 리포트와 gate summary를 evidence로 보관한다. |
-| 새 CVE가 공개되면 과거 이미지가 영향받는가? | SBOM을 기준으로 이미지 구성요소를 다시 추적한다. |
-| 배포 후 실제 공격 행위는 보이는가? | Runtime 계층에서 Cilium/Hubble, Falco, kube-bench, DAST를 GitOps로 배치할 수 있게 한다. |
+| 이 코드를 배포해도 되는가? | Jenkins CI에서 SAST, secret scan, IaC scan, image scan, SBOM 생성, Security Gate 수행 |
+| 무엇 때문에 막거나 허용했는가? | 도구별 JSON/TXT 리포트와 gate summary를 evidence로 보관 + DefectDojo triage |
+| 새 CVE가 공개되면 과거 이미지가 영향받는가? | 저장된 SBOM을 기준으로 이미지 구성요소를 재추적·재스캔 |
+| 배포 후 실제 공격 행위는 보이는가? | 런타임 계층에서 Cilium/Hubble, Falco가 탐지·차단하고 증적화 |
 
-## Project framing
+## 프로젝트 3축
 
-이 PoC는 세 가지 축으로 구성된다.
-
-1. **Application**: 기존 VulnBank를 6개 서비스 기반 MSA 형태로 분해한 실습 워크로드
-2. **CI/Supply Chain**: Jenkins, Harbor, SonarQube, Gitleaks, Checkov, Kubescape, SBOM, Trivy, Security Gate
-3. **Runtime/GitOps**: k3s, ArgoCD, Helm, Cilium/Hubble, Falco, kube-bench, OWASP ZAP, DefectDojo 연계 자리
+1. **Application** — 기존 VulnBank를 6개 서비스 MSA로 분해한 실습 워크로드
+2. **CI / Supply Chain** — Jenkins, Harbor, SonarQube, Gitleaks, Checkov, Kubescape, SBOM(Syft), Trivy, Security Gate
+3. **Runtime / GitOps** — k3s, ArgoCD, Helm, Cilium/Hubble, Falco, kube-bench, OWASP ZAP, DefectDojo
 
 ## What this is not
 
-이 문서는 운영 환경 보안 기준서가 아니다. PoC 문서이며, 일부 비밀번호와 토큰 방식은 의도적으로 단순화되어 있다. 실제 운영 전에는 Secret 관리, TLS, 접근제어, 키 회전, 이미지 서명 정책, 네트워크 정책의 단계적 강제 적용이 필요하다.
+운영 환경 보안 기준서가 아니다. PoC 문서이며 일부 비밀번호·토큰 방식은 의도적으로 단순화돼 있다. 실제 운영 전에는 Secret 관리, TLS, 접근제어, 키 회전, 이미지 서명 정책, 네트워크 정책의 단계적 강제 적용이 필요하다.
 
 ## Evidence baseline
 
@@ -37,4 +88,4 @@
 | Security Gate | BLOCK 판단, `ENFORCE_GATE=false`라 evidence 기록 후 계속 진행 |
 | Harbor push | 6개 서비스 image push 완료 |
 
-민감한 registry host와 credential은 문서에서 `<HARBOR_REGISTRY>`, `<HARBOR_PASSWORD>` 같은 placeholder로 표기한다.
+민감한 registry host·credential은 문서에서 `<HARBOR_REGISTRY>`, `<HARBOR_PASSWORD>` 같은 placeholder로 표기한다.
