@@ -1,8 +1,38 @@
-# Security Scenarios
+# 위협 모델 & 보안 시나리오
 
-이 장은 "도구가 있다"가 아니라 "보안담당자가 어떤 상황에서 무엇을 판단하는가"를 기준으로 정리한다.
+이 장은 "도구가 있다"가 아니라 **"보안담당자가 공격 생애주기의 각 단계에서 무엇을 묻고, 무엇으로 판단·차단·증적하는가"**를 기준으로 정리한다. 출발점은 [해결하려는 문제](overview.md#problem) — 단일 도구의 사각, 1회 검사의 한계, 흩어진 판단·증적 — 이고, 그 답이 아래 단계별 시나리오다.
 
-## Scenario matrix
+## 왜 이 시나리오들인가 — 공격 생애주기 → 통제 매핑
+
+방어는 공격의 생애주기를 따라 계층으로 배치된다. 각 단계마다 보안담당자의 질문이 있고, 그 질문에 답하는 통제가 있으며, **최근 실제 공급망 사건이 "왜 그 단계가 중요한지"를 증명한다.**
+
+```mermaid
+flowchart LR
+    A["① 의존성·소스"] --> B["② 빌드·CI"] --> C["③ 이미지<br/>레지스트리"] --> D["④ 배포<br/>GitOps"] --> E["⑤ 런타임"] --> F["⑥ 증적·triage"]
+    A -.- a["Trivy SCA · Gitleaks<br/>SBOM (Syft)"]
+    B -.- b["SonarQube · Checkov<br/>Kubescape · Gate"]
+    C -.- c["Cosign · Kyverno<br/>(planned)"]
+    D -.- d["ArgoCD self-heal"]
+    E -.- e["Falco · Cilium<br/>egress default-deny"]
+    F -.- f["DefectDojo<br/>(+ AI triage)"]
+    classDef stage fill:#e0f2fe,stroke:#0284c7,color:#0f172a
+    classDef ctrl fill:#ecfdf5,stroke:#16a34a,color:#0f172a
+    class A,B,C,D,E,F stage
+    class a,b,c,d,e,f ctrl
+```
+
+| 단계 | 보안담당자 질문 | 시나리오 | 통제 | 최근 공급망 사건 |
+| --- | --- | --- | --- | --- |
+| **① 의존성·소스** | 알려진 악성/취약 버전인가? 과거 빌드도 영향받나? 시크릿이 새는가? | #1 #2 #3 | Trivy · SBOM 재평가 · Gitleaks | axios·node-ipc (known→재평가) · Shai-Hulud (시크릿 탈취) |
+| **② 빌드·CI** | 위험한 권한/설정인가? CI 인프라 자체가 변조됐나? | #4 (+ CI 하드닝) | Checkov · Kubescape · Gate · PAT 최소권한 | TanStack (CI 파이프라인 침해) |
+| **③ 이미지·레지스트리** | 서명 없는/변조된 이미지가 배포되나? | #5 | Cosign + Kyverno *(planned)* | TanStack · 이미지 변조 |
+| **④ 배포·GitOps** | runtime이 Git 선언과 달라졌나? | #6 | ArgoCD self-heal | (무결성 · 드리프트) |
+| **⑤ 런타임** | 비즈니스 로직 악용? 셸/파일쓰기? 비정상 egress? | #7 #8 #9 | DAST · Falco · Cilium egress | axios RAT C2 · node-ipc exfil (런타임 차단) |
+| **⑥ 증적·triage** | 진짜 조치 대상 vs accepted risk? | #10 #11 | DefectDojo (+ AI) | (전부 — 추적 · SLA · VEX) |
+
+> 최근 공급망 사건별 "어디서 막고 어디서 못 막는가"의 정직한 분석은 [공급망 방어](supply-chain-defense.md)에 계층별로 정리돼 있다.
+
+## 시나리오 매트릭스
 
 | # | 상황 | 보안담당자 질문 | 통제 | 증적 |
 | --- | --- | --- | --- | --- |
@@ -40,6 +70,8 @@ SBOM은 신규 CVE 대응의 기준이다. 새 CVE가 공개되면 "지금 build
 
 현재 상태: SBOM 생성은 완료. Dependency tracking 시스템과 자동 재평가 job은 TODO.
 
+> **최근 사건 연결** — axios·node-ipc류는 침해 *직후*엔 advisory가 없어 SCA가 못 잡지만, 며칠 내 GHSA에 등재되면 **저장된 SBOM을 재스캔**해 "우리 배포본이 그 악성 버전을 쓰는가"를 즉시 식별한다. = 1회 검사가 아니라 **시간축 방어**. → [공급망 방어](supply-chain-defense.md)
+
 ## 3. Secret leak
 
 Gitleaks는 source와 history에서 secret 후보를 탐지한다. Gate 기준은 finding count 0이다.
@@ -71,6 +103,8 @@ Checkov는 multi-tech IaC 관점, Kubescape는 K8s hardening framework 관점이
 
 이 기능은 "서명 없이 registry에 올라온 image가 GitOps로 배포되는 상황"을 막는 스토리로 도입해야 한다. 단순 도구 추가가 아니라 registry compromise, credential abuse, tag overwrite 시나리오와 연결해야 한다.
 
+> **최근 사건 연결** — TanStack 침해는 **CI 파이프라인을 장악**해 6분 내 84개 악성 아티팩트를 publish했다. 서명 검증(Cosign/Kyverno)이 있으면 미서명·변조 이미지의 배포를 정면 차단한다 — 공급망 무결성의 정공법이자 [로드맵](limitations.md) 최우선 보강. → [공급망 방어](supply-chain-defense.md)
+
 ## 6. GitOps drift
 
 ArgoCD는 GitOps repo의 선언 상태와 runtime 상태를 비교한다. self-heal이 켜져 있으면 수동 변경을 되돌린다.
@@ -100,6 +134,8 @@ Falco는 컨테이너 내부의 shell spawn, PHP file write 같은 행위를 sys
 
 현재 GitOps repo에는 Falco Application과 custom rule values가 준비되어 있다. 실제 alert 검증 증적은 TODO.
 
+> **최근 사건 연결** — axios 침해 페이로드는 RAT를 내려받아 **실행**했다. Falco는 컨테이너 내부의 그런 셸 spawn·의심 프로세스를 syscall 기반으로 탐지한다(빌드 검사를 통과한 페이로드의 *행위*를 잡는 마지막 층).
+
 ## 9. Runtime network abuse
 
 Cilium/Hubble은 네트워크 정책과 flow visibility를 제공한다. default-deny와 allow-list 정책은 애플리케이션 통신을 깨뜨릴 수 있으므로 단계적으로 적용해야 한다.
@@ -109,6 +145,8 @@ Cilium/Hubble은 네트워크 정책과 flow visibility를 제공한다. default
 - Cilium/Hubble platform manifest 존재
 - Hubble UI exposure manifest 존재
 - network policy는 적용 전 검증 필요
+
+> **최근 사건 연결** — RAT C2 통신·credential exfil은 모두 **외부 egress**가 필요하다. Cilium `default-deny`가 허용되지 않은 egress를 차단하면, 악성 코드가 빌드를 통과해 배포돼도 *외부로 나가지 못해* C2·탈취가 무력화된다 — 공급망 방어의 **최강 보완통제**. → [공급망 방어](supply-chain-defense.md)
 
 ## 10. DefectDojo triage
 
