@@ -9,7 +9,7 @@
 
     ---
 
-    AWS 4-VM 토폴로지 + `개발자 → CI → Harbor → GitOps → 런타임 보안 → 증적` 골든패스 흐름, IaC 부트스트랩.
+    AWS 3-VM 토폴로지(CI · runtime k3s · DefectDojo) + `개발자 → CI → Harbor → GitOps → 런타임 보안 → 증적` 골든패스. VulnBank는 k3s 위에서 동작.
 
     [아키텍처 보기 →](architecture.md)
 

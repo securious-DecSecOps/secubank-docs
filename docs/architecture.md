@@ -14,16 +14,15 @@ PoC는 역할별로 3개 정본 repo를 분리한다.
 
 ## AWS role model
 
-사용자가 목표로 잡은 모델은 4개 역할이다.
+PoC는 3개 역할 VM으로 구성된다.
 
-| 역할 | 목적 | 현재 코드 상태 |
-| --- | --- | --- |
-| CI / Supply Chain VM | Jenkins, Harbor, scanner CLI, SonarQube | Terraform user-data에 반영됨 |
-| Runtime k3s VM | k3s, Cilium, ArgoCD, GitOps root app | Terraform user-data에 반영됨 |
-| MSA target VM | Runtime과 분리된 공격/검증 대상 또는 별도 workload target | TODO: 현재 Terraform에는 독립 EC2로 분리되어 있지 않음 |
-| DefectDojo VM | ASOC findings 통합, triage, accepted risk 관리 | Terraform module과 user-data 초안 존재 |
+| 역할 | 목적 |
+| --- | --- |
+| CI / Supply Chain VM | Jenkins, Harbor, scanner CLI, SonarQube |
+| Runtime k3s VM | k3s, Cilium/Hubble, Falco, kube-bench, ArgoCD, **VulnBank MSA 워크로드** |
+| DefectDojo VM | ASOC findings 통합, triage, accepted risk 관리 |
 
-현재 Terraform 코드에서 확인되는 EC2는 CI, runtime, DefectDojo 3개다. 따라서 문서에서는 4-VM을 목표 성숙도 모델로 표현하고, `msa-target` 분리는 TODO로 둔다.
+VulnBank는 **runtime k3s 위에 배포**한다 — 그래야 Cilium/Falco 같은 런타임 보안 통제가 실제 취약 앱을 관측·차단할 수 있다(시나리오 #8). 앱을 별도 VM(docker)으로 분리하면 런타임 보안 계층이 앱을 보지 못하므로 채택하지 않는다.
 
 ## Golden Path flow
 
