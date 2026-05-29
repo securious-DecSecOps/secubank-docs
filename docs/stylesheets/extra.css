@@ -176,3 +176,27 @@
   .sb-stat { border-right: none; border-bottom: 1px solid var(--sb-border); padding-bottom: 1.2rem; }
   .sb-cta .md-button { width: 100%; text-align: center; }
 }
+
+/* ============================================================ CONTENT COMPONENTS (md 본문) ============================================================ */
+/* 페이지 리드 — 큰 인트로 문단(액센트 좌측선) */
+.md-typeset .sb-lede { font-size: 1.05rem; line-height: 1.72; color: var(--sb-ink-2); border-left: 3px solid var(--sb-accent); padding-left: 1.1rem; margin: 1.2rem 0 2.2rem; }
+.md-typeset .sb-lede strong { color: var(--sb-ink); font-weight: 700; }
+
+/* 핵심 콜아웃 — 절제된 강조 박스 */
+.md-typeset .sb-key { background: var(--sb-accent-soft); border: 1px solid var(--sb-border-2); border-left: 3px solid var(--sb-accent); border-radius: 12px; padding: .95rem 1.15rem; margin: 1.7rem 0; font-size: .93em; color: var(--sb-ink-2); }
+.md-typeset .sb-key strong { color: var(--sb-ink); }
+.md-typeset .sb-key > :first-child { margin-top: 0; }
+.md-typeset .sb-key > :last-child { margin-bottom: 0; }
+
+/* 라벨 카드 그리드 — 표 대신 시각적 포인트 */
+.md-typeset .sb-points { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 1rem; margin: 1.7rem 0; padding: 0; list-style: none; }
+.md-typeset .sb-points > li { margin: 0; border: 1px solid var(--sb-border); border-radius: var(--sb-radius); background: var(--sb-bg); padding: 1.15rem 1.25rem; box-shadow: var(--sb-shadow-sm); }
+.md-typeset .sb-points__k { display: inline-block; width: max-content; font-size: .72rem; font-weight: 700; color: var(--sb-accent); background: var(--sb-accent-soft); border-radius: 6px; padding: .18rem .5rem; margin-bottom: .6rem; }
+.md-typeset .sb-points > li > span:last-child { display: block; color: var(--sb-muted); font-size: .86rem; line-height: 1.55; }
+
+/* KPI — 큰 숫자 강조(텍스트 벽 깨기) */
+.md-typeset .sb-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .9rem; margin: 1.7rem 0; padding: 0; list-style: none; }
+.md-typeset .sb-kpis > li { margin: 0; border: 1px solid var(--sb-border); border-radius: var(--sb-radius); background: var(--sb-bg-2); padding: 1.05rem 1.15rem; }
+.md-typeset .sb-kpis > li > b { display: block; font-size: 1.55rem; font-weight: 800; color: var(--sb-ink); letter-spacing: -.02em; line-height: 1.1; }
+.md-typeset .sb-kpis > li.is-accent > b { color: var(--sb-accent); }
+.md-typeset .sb-kpis > li > span { display: block; margin-top: .35rem; font-size: .76rem; color: var(--sb-muted); line-height: 1.45; }
