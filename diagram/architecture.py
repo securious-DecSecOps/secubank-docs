@@ -73,6 +73,22 @@ def grid_node(g, nid, title, items, cols=3, color=C_EC2):
     g.node(nid, shape="box", style="rounded", color=color, penwidth="1.3",
            label=f'<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2" CELLPADDING="2">{cells}</TABLE>>')
 
+def k8s(rel):  # k8s 공식 아이콘(diagrams 번들)
+    p = os.path.join(RES, "k8s", rel)
+    return p if os.path.exists(p) else _find(os.path.join(RES, "k8s"), os.path.basename(rel))
+
+POD = k8s("compute/pod.png")
+
+def pod(g, nid, name, vuln=None):
+    """k8s Pod 노드 — 취약 서비스는 빨간 테두리 + 취약점 태그(⚠)로 강조."""
+    color = C_SEC if vuln else "#2F6BFF"
+    vtag = (f"<BR/><FONT POINT-SIZE='7' COLOR='{C_SEC}'><B>⚠ {vuln}</B></FONT>" if vuln else "")
+    g.node(nid, shape="box", style="rounded,filled", fillcolor="white",
+           color=color, penwidth=("2.0" if vuln else "1.3"), fontname="Pretendard",
+           label=(f'<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="1">'
+                  f'<TR><TD FIXEDSIZE="TRUE" WIDTH="30" HEIGHT="30"><IMG SCALE="TRUE" SRC="{POD}"/></TD></TR>'
+                  f'<TR><TD><FONT POINT-SIZE="8" FACE="Pretendard">{name}</FONT>{vtag}</TD></TR></TABLE>>'))
+
 g = graphviz.Digraph("architecture", format="png")
 g.attr(rankdir="LR", bgcolor="white", fontname="Pretendard", pad="0.6",
        nodesep="0.4", ranksep="0.9", dpi="170", compound="true",
@@ -97,7 +113,7 @@ with g.subgraph(name="cluster_cloud") as cloud:
         inode(m, "iam", aws("security/identity-and-access-management-iam-role.png"), "IAM Role<BR/>SSH 미사용")
         inode(m, "ssm", aws("management/systems-manager.png"), "SSM<BR/>Session Manager")
         inode(m, "param", aws("management/systems-manager-parameter-store.png"), "Parameter Store<BR/><FONT POINT-SIZE='7'>planned</FONT>")
-        inode(m, "sns", aws("integration/simple-notification-service-sns.png"), "SNS<BR/><FONT POINT-SIZE='7'>planned</FONT>")
+        inode(m, "sns", aws("integration/simple-notification-service-sns.png"), "SNS<BR/>Gate 알림(email)")
         inode(m, "cw", aws("management/cloudwatch.png"), "CloudWatch<BR/><FONT POINT-SIZE='7'>planned</FONT>")
 
     # VPC
@@ -127,13 +143,23 @@ with g.subgraph(name="cluster_cloud") as cloud:
             with sn.subgraph(name="cluster_rt") as rt:
                 rt.attr(**cluster(sn, "rt", aws("compute/ec2-instance.png"),
                                   "EC2 · Runtime  (t3.xlarge · k3s)", C_EC2, "#FDF2E8")[1])
-                inode(rt, "argo", onp("gitops/argocd.png"), "ArgoCD<BR/>GitOps")
-                inode(rt, "cilium", loc("cilium"), "Cilium · Hubble")
-                inode(rt, "falco", loc("falco"), "Falco")
+                # 런타임 보안 플랫폼 — 네임스페이스 밖에서 워크로드를 배포·관측·차단
+                inode(rt, "argo", loc("argo"), "ArgoCD<BR/>GitOps sync")
+                inode(rt, "cilium", loc("cilium"), "Cilium · Hubble<BR/>eBPF CNI")
+                inode(rt, "falco", loc("falco"), "Falco<BR/>런타임 탐지")
                 chip(rt, "kbench", "kube-bench · CIS")
                 inode(rt, "zap", loc("zap"), "OWASP ZAP<BR/>DAST")
-                inode(rt, "vb", onp("container/k3s.png"), "VulnBank MSA<BR/>6 services")
-                inode(rt, "db", onp("database/mariadb.png"), "MariaDB · PVC")
+
+                # k8s 네임스페이스 — VulnBank MSA Pod 6개 + DB (취약 서비스 빨간 강조)
+                with rt.subgraph(name="cluster_ns") as ns:
+                    ns.attr(**cluster(rt, "ns", POD, "VulnBank MSA · k8s namespace", "#2F6BFF", "#F4F7FF")[1])
+                    pod(ns, "fe", "frontend<BR/>:8080 gateway")
+                    pod(ns, "usr", "user-service")
+                    pod(ns, "txn", "transaction-service", "V1 음수송금·V2 IDOR")
+                    pod(ns, "sts", "status-service")
+                    pod(ns, "fil", "file-service", "V4 RCE")
+                    pod(ns, "set", "settings-service", "V3 IDOR")
+                    inode(ns, "db", onp("database/mariadb.png"), "vulnbank-db<BR/>MariaDB · PVC")
 
             # EC2 — DefectDojo
             with sn.subgraph(name="cluster_dd") as dd:
@@ -141,19 +167,32 @@ with g.subgraph(name="cluster_cloud") as cloud:
                                   "EC2 · DefectDojo  (t3.medium)", C_EC2, "#FDF2E8")[1])
                 inode(dd, "defectdojo", loc("defectdojo"), "DefectDojo<BR/>ASOC 증적")
 
-# --- 데이터 플로우 ---
+# --- 데이터 플로우 (도구 간 연결을 화살표로) ---
+# 공급망 (좌 → 우): 소스 → CI → 레지스트리 / 증적
 g.edge("dev", "gh", label="git push")
 g.edge("gh", "jenkins", label="webhook / poll")
 g.edge("jenkins", "scanners", label="runs", color=C_MGMT, style="dashed")
-g.edge("jenkins", "harbor", label="build·scan·gate", color=C_EC2)
-g.edge("harbor", "argo", label="image pull", color=C_SUBNET, lhead="cluster_rt")
-g.edge("argo", "vb", color=C_SUBNET)
-g.edge("vb", "db", color="#9AA4B2")
-g.edge("cilium", "vb", label="L3-L7 / egress", color=C_SEC, style="dashed")
-g.edge("falco", "vb", label="runtime detect", color=C_SEC, style="dashed")
-g.edge("zap", "vb", label="DAST", color=C_SEC, style="dashed")
+g.edge("jenkins", "harbor", label="build · scan · gate", color=C_EC2)
 g.edge("jenkins", "defectdojo", label="import-scan", color=C_VPC, lhead="cluster_dd")
 g.edge("igw", "jenkins", color="#9AA4B2", style="dashed")
+
+# 배포: Harbor 이미지 → 네임스페이스, ArgoCD가 GitOps로 동기화
+g.edge("harbor", "fe", label="image pull", color=C_SUBNET, lhead="cluster_ns")
+g.edge("argo", "fe", label="GitOps sync", color=C_SUBNET, lhead="cluster_ns")
+
+# 앱 호출 그래프: 게이트웨이 → 백엔드 → DB, 백엔드 → user-service(HTTP 조회)
+for svc in ("usr", "txn", "sts", "fil", "set"):
+    g.edge("fe", svc, color="#2F6BFF")
+for svc in ("usr", "txn", "sts", "fil", "set"):
+    g.edge(svc, "db", color="#9AA4B2")
+g.edge("txn", "usr", label="user lookup", color="#9AA4B2", style="dotted", constraint="false")
+g.edge("set", "usr", color="#9AA4B2", style="dotted", constraint="false")
+
+# 런타임 보안 통제: 네임스페이스를 관측·차단 (빨간 점선)
+g.edge("cilium", "txn", label="L3-L7 · default-deny", color=C_SEC, style="dashed", lhead="cluster_ns")
+g.edge("falco", "fil", label="런타임 탐지", color=C_SEC, style="dashed", lhead="cluster_ns")
+g.edge("zap", "fe", label="DAST", color=C_SEC, style="dashed")
+g.edge("kbench", "defectdojo", label="CIS report", color=C_VPC, style="dashed", lhead="cluster_dd")
 
 out = g.render(filename=os.path.join(HERE, "architecture"), format="png", cleanup=True)
 print("rendered:", out)

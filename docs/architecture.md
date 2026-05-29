@@ -2,7 +2,7 @@
 
 ![SecuBank DevSecOps Golden Path 아키텍처](assets/img/architecture.png){ loading=lazy }
 
-> 3-VM target 아키텍처 — VulnBank는 **runtime k3s** 위에서 동작한다. `diagram/architecture.py`(diagram-as-code)로 생성되어 **재현 가능**하다. 점선·"planned" 표기(SSM 시크릿, SNS 알림, Prometheus/Grafana)는 아직 미구현이다.
+> 3-VM target 아키텍처 — VulnBank MSA **6개 Pod**(frontend 게이트웨이 + user·transaction·status·file·settings)가 **runtime k3s 네임스페이스** 위에서 동작하고, 의도된 취약 서비스(transaction V1·V2 / file V4 / settings V3)는 빨간 테두리·⚠ 태그로 강조했다. 화살표는 ① 공급망(소스→CI→레지스트리·증적), ② 배포(image pull · GitOps sync), ③ 앱 호출 그래프(게이트웨이→백엔드→DB, user-service 조회), ④ 런타임 통제(Cilium L3-L7 default-deny · Falco 탐지 · ZAP DAST · kube-bench CIS)를 모두 표시한다. `diagram/architecture.py`(diagram-as-code)로 생성되어 **재현 가능**하다. "planned" 표기(Parameter Store 시크릿, CloudWatch, Grafana 보안 대시보드)는 아직 미구현이다.
 
 ## Repository model
 
@@ -71,36 +71,47 @@ flowchart TB
     end
 
     subgraph Runtime["Runtime k3s VM"]
-      Cilium["Cilium + Hubble"]
       ArgoCD["ArgoCD"]
+      Cilium["Cilium + Hubble"]
       Falco["Falco"]
       KubeBench["kube-bench"]
       ZAP["OWASP ZAP CronJob"]
-      App["VulnBank MSA Pods"]
-      DB["MariaDB PVC"]
-      ArgoCD --> App
-      App --> DB
-      Cilium --> App
-      Falco --> App
-      KubeBench --> RuntimeReport["Cluster hardening report"]
-      ZAP --> App
-      App --> RuntimeReport
+      subgraph NS["VulnBank MSA · k8s namespace"]
+        FE["frontend :8080<br/>gateway"]
+        USR["user-service"]
+        TXN["transaction-service<br/>⚠ V1 음수송금 · V2 IDOR"]
+        STS["status-service"]
+        FIL["file-service<br/>⚠ V4 RCE"]
+        SET["settings-service<br/>⚠ V3 IDOR"]
+        DB["vulnbank-db<br/>MariaDB PVC"]
+        FE --> USR & TXN & STS & FIL & SET
+        TXN -.user lookup.-> USR
+        SET -.user lookup.-> USR
+        USR & TXN & STS & FIL & SET --> DB
+      end
+      ArgoCD -->|GitOps sync| FE
+      Cilium -->|L3-L7 default-deny| FE
+      Falco -->|런타임 탐지| FIL
+      ZAP -->|DAST| FE
+      KubeBench --> RuntimeReport["CIS hardening report"]
     end
 
     subgraph Triage["DefectDojo VM"]
       DD["DefectDojo"]
     end
 
-    Harbor --> App
+    Harbor -->|image pull| FE
+    Sonar --> DD
     Tools --> DD
     RuntimeReport --> DD
 
     classDef ci fill:#e0f2fe,stroke:#0284c7,color:#0f172a
     classDef runtime fill:#dcfce7,stroke:#16a34a,color:#0f172a
-    classDef security fill:#fef3c7,stroke:#d97706,color:#0f172a
+    classDef vuln fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
     classDef triage fill:#ede9fe,stroke:#7c3aed,color:#0f172a
     class Jenkins,Harbor,Sonar,Tools ci
-    class Cilium,ArgoCD,Falco,KubeBench,ZAP,App,DB,RuntimeReport runtime
+    class ArgoCD,Cilium,Falco,KubeBench,ZAP,FE,USR,STS,DB,RuntimeReport runtime
+    class TXN,FIL,SET vuln
     class DD triage
 ```
 
