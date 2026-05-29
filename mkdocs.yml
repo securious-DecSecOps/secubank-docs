@@ -93,9 +93,12 @@ nav:
   - 개요: index.md
   - 기술 블로그: overview.md
   - 아키텍처: architecture.md
+  - 보안 도구 원리: security-tools.md
   - CI 보안 파이프라인: ci-security-pipeline.md
   - 보안 시나리오: security-scenarios.md
   - 탐지 효능(정탐/오탐): detection-efficacy.md
+  - 공급망 방어: supply-chain-defense.md
   - 런타임 보안: runtime-security.md
   - 증적 & Triage: evidence-triage.md
   - ISMS-P 매핑: isms-p-mapping.md
+  - 코드·설정 맵: code-map.md
