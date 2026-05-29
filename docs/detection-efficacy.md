@@ -43,7 +43,7 @@ AWS CI Build `#3`에서 확인된 정량 값이다.
 | Security Gate | BLOCK |
 | Blocked service count | 6 |
 
-## 정량 지표 정의 (수식)
+## 정량 지표 정의 (수식) {#metrics-def}
 
 각 도구의 효능은 단어가 아니라 분류 지표로 표현한다. 분모가 무엇이냐(존재하는 결함 vs 도구가 보고한 것)가 Recall과 Precision을 가른다.
 
@@ -126,7 +126,7 @@ xychart-beta
 - **SAST 의도취약점 recall = 0 / 4.** 단 SAST는 A02(암호/TLS)는 정확히 탐지 → "SAST 무용"이 아니라 "담당 레이어가 다름".
 - **전체 security_rating = D 인데 Quality Gate는 PASS** — 게이트가 `new_security_rating`(신규 코드)만 평가했기 때문. 기본 게이트 정책의 함정.
 - ※ VULN-1·VULN-4는 소스에서 취약 코드 직접 확인(확정 FN), VULN-2·3은 SAST findings에 부재(소스 재확인 TODO).
-- → 이 **0/4를 DAST가 3/4로 메운 것**이 계층방어의 정량 근거 — AWS 라이브에서 음수송금·IDOR·웹쉘 RCE를 실제 요청으로 재현(웹쉘은 프론트엔드 게이트웨이 통해 **실행**까지). 위 [수식·차트](#정량-지표-정의-수식) 참고.
+- → 이 **0/4를 DAST가 3/4로 메운 것**이 계층방어의 정량 근거 — AWS 라이브에서 음수송금·IDOR·웹쉘 RCE를 실제 요청으로 재현(웹쉘은 프론트엔드 게이트웨이 통해 **실행**까지). 위 [수식·차트](#metrics-def) 참고.
 
 ## Metrics to complete
 
