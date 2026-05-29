@@ -84,7 +84,7 @@
 | IaC/K8s | Checkov 30 findings, Kubescape NSA 14/20·MITRE 16/17·CIS 26/33 |
 | SBOM | 6개 서비스 SPDX+CycloneDX |
 
-## 한계 및 향후
+## 한계 및 향후 { #limitations }
 
 이 PoC는 **보안 통제(탐지·차단·증적)** 축에 집중했고, 다음은 의도적으로 범위 밖이다 — 다만 갭을 인지한다.
 
