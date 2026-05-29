@@ -4,21 +4,9 @@ Evidence의 목적은 "빌드가 성공했다"가 아니라 "무엇을 검사했
 
 ## Evidence chain
 
-```mermaid
-flowchart LR
-    Commit["Repo SHA"] --> Build["Jenkins Build"]
-    Build --> Image["Image tag"]
-    Image --> SBOM["SBOM"]
-    Image --> Trivy["Trivy report"]
-    Build --> SAST["SonarQube / Gitleaks"]
-    Build --> IaC["Checkov / Kubescape"]
-    Trivy --> Gate["Security Gate"]
-    SAST --> Gate
-    IaC --> Gate
-    Gate --> Push["Harbor push"]
-    Push --> Artifact["Jenkins archived reports"]
-    Artifact --> Triage["DefectDojo / security review"]
-```
+![Evidence & Triage Flow](assets/img/evidence.png){ loading=lazy }
+
+> CI 스캔·생성 → Security Gate → 증적 보관(Jenkins archive + Harbor digest) → DefectDojo 통합 → Triage 결정. 런타임 증적(Falco·Hubble·DAST)과 SBOM 기반 신규 CVE 재평가가 측면 입력으로 합류한다. `diagram/evidence.py`(diagram-as-code)로 생성되어 재현 가능하다.
 
 ## CI evidence artifacts
 
@@ -86,8 +74,8 @@ DefectDojo는 로그 저장소가 아니라 findings lifecycle 관리 도구다.
 
 현재 상태:
 
-- 전용 VM과 bootstrap 초안 존재
-- 실제 scanner import 자동화는 TODO
+- 전용 VM 가동 + Gitleaks / Trivy / Checkov / CycloneDX(SBOM) import 동작 (별도 Jenkins job)
+- 메인 파이프라인으로의 import stage 통합, SonarQube API import는 진행 중
 
 ## Triage decision model
 

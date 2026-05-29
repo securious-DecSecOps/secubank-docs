@@ -43,19 +43,19 @@ def cluster(parent, cid, icon, text, color, bg):
     sub = parent.subgraph(name="cluster_" + cid)
     return sub, dict(label=frame(icon, text, color), labelloc="t", labeljust="l",
                      style="rounded", color=color, penwidth="2.2", bgcolor=bg,
-                     margin="16", fontname="Helvetica")
+                     margin="16", fontname="Pretendard")
 
 def inode(g, nid, icon, name):
     """아이콘 위 + 라벨 아래 (실제 로고 노드)."""
     g.node(nid, shape="plaintext", margin="0",
            label=(f'<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">'
                   f'<TR><TD FIXEDSIZE="TRUE" WIDTH="46" HEIGHT="46"><IMG SCALE="TRUE" SRC="{icon}"/></TD></TR>'
-                  f'<TR><TD><FONT POINT-SIZE="9" FACE="Helvetica">{name}</FONT></TD></TR></TABLE>>'))
+                  f'<TR><TD><FONT POINT-SIZE="9" FACE="Pretendard">{name}</FONT></TD></TR></TABLE>>'))
 
 def chip(g, nid, name, color=C_EC2):
     """로고 없는 도구: 통일된 칩."""
     g.node(nid, shape="box", style="rounded,filled", fillcolor="white",
-           color=color, penwidth="1.4", fontname="Helvetica", fontsize="9",
+           color=color, penwidth="1.4", fontname="Pretendard", fontsize="9",
            label=name, height="0.5", margin="0.12,0.06")
 
 def grid_node(g, nid, title, items, cols=3, color=C_EC2):
@@ -74,12 +74,12 @@ def grid_node(g, nid, title, items, cols=3, color=C_EC2):
            label=f'<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2" CELLPADDING="2">{cells}</TABLE>>')
 
 g = graphviz.Digraph("architecture", format="png")
-g.attr(rankdir="LR", bgcolor="white", fontname="Helvetica", pad="0.6",
+g.attr(rankdir="LR", bgcolor="white", fontname="Pretendard", pad="0.6",
        nodesep="0.4", ranksep="0.9", dpi="170", compound="true",
        labelloc="t", fontsize="20",
        label="SecuBank DevSecOps Golden Path · AWS (ap-northeast-2)")
-g.attr("node", fontname="Helvetica")
-g.attr("edge", fontname="Helvetica", fontsize="10", color="#5A6B86")
+g.attr("node", fontname="Pretendard")
+g.attr("edge", fontname="Pretendard", fontsize="10", color="#5A6B86")
 
 # 외부
 inode(g, "dev", aws("general/user.png") or aws("general/users.png"), "개발자")
