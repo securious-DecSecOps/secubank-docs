@@ -102,6 +102,7 @@ nav:
   - 보안 시나리오: security-scenarios.md
   - 탐지 효능(정탐/오탐): detection-efficacy.md
   - 공급망 방어: supply-chain-defense.md
+  - 증적 재현 런북: reproduce.md
   - 런타임 보안: runtime-security.md
   - 증적 & Triage: evidence-triage.md
   - ISMS-P 매핑: isms-p-mapping.md

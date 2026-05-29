@@ -47,6 +47,10 @@
 
 ## 4. 실증 가능성 (이론 아님)
 
+<div class="sb-key" markdown>
+아래 주장들은 **[증적 재현 런북](reproduce.md)** 으로 누구나 직접 확인할 수 있다 — 추가 VM 없이 기존 클러스터에서, VulnBank 네임스페이스에만 적용·롤백되는 비파괴 절차다. 실행해 증적을 캡처하면 이 페이지의 🟡가 ✅로 바뀐다.
+</div>
+
 | 주장 | 실증 방법 | 현재 |
 | --- | --- | --- |
 | "런타임 egress로 C2를 막는다" | VulnBank 파드에 default-deny CiliumNetworkPolicy 적용 → 외부 IP 호출이 Hubble에 DROPPED로 기록 | ✅ 가능(Cilium 동작 중, 정책 적용만) |
