@@ -1,10 +1,13 @@
 site_name: VulnBank MSA DevSecOps Golden Path
 site_description: 금융권 보안담당자 실무를 Kubernetes 파이프라인으로 재현한 DevSecOps Golden Path PoC
 site_url: https://securious-decsecops.github.io/secubank-docs/
+repo_url: https://github.com/securious-DecSecOps/secubank-docs
+repo_name: securious-DecSecOps/secubank-docs
 
 theme:
   name: material
   language: ko
+  custom_dir: overrides
   logo: assets/brand/logo.svg
   favicon: assets/brand/favicon.svg
   font: false
@@ -77,6 +80,7 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_div_format
 
 extra_css:
+  - https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css
   - stylesheets/extra.css
 
 extra:

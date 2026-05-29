@@ -1,0 +1,167 @@
+{#
+  SecuBank DevSecOps Golden Path — 커스텀 랜딩 페이지
+  index.md front matter(template: home.html, hide: [navigation, toc])에서 사용.
+  모든 섹션을 tabs 블록에 넣어 full-bleed 로 렌더하고 content 블록은 비운다
+  (mkdocs-material 랜딩 페이지 표준 패턴).
+#}
+{% extends "main.html" %}
+
+{% block tabs %}
+  {{ super() }}
+
+  <!-- ===================== HERO ===================== -->
+  <section class="sb-hero">
+    <div class="sb-hero__bg" aria-hidden="true"></div>
+    <div class="sb-wrap sb-hero__inner">
+      <p class="sb-eyebrow">Open-source · Evidence-driven DevSecOps</p>
+      <h1 class="sb-hero__title">
+        보안 도구를 나열하지 않습니다.<br>
+        <span class="sb-grad">실제로 막고, 데이터로 증명합니다.</span>
+      </h1>
+      <p class="sb-hero__sub">
+        금융권 보안담당자의 실무 — 판단 · 차단 · 추적 · 재평가 · 증적 — 을
+        Kubernetes 파이프라인으로 재현한 <strong>재사용 가능한 Golden Path</strong>.
+        취약 워크로드를 통과시켜 각 통제의 탐지 효능을 정량 지표로 검증합니다.
+      </p>
+      <div class="sb-cta">
+        <a href="{{ 'overview/' | url }}" class="md-button md-button--primary">기술 개요 보기</a>
+        <a href="{{ 'architecture/' | url }}" class="md-button">아키텍처</a>
+        {% if config.repo_url %}
+        <a href="{{ config.repo_url }}" class="md-button sb-button--ghost" target="_blank" rel="noopener">
+          {% include ".icons/fontawesome/brands/github.svg" %} GitHub
+        </a>
+        {% endif %}
+      </div>
+      <ul class="sb-badges">
+        <li>AWS 3-VM · IaC</li>
+        <li>Jenkins 18-stage CI</li>
+        <li>k3s · Cilium · ArgoCD</li>
+        <li>OWASP / CWE / ISMS-P</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== STAT STRIP ===================== -->
+  <section class="sb-stats-wrap">
+    <div class="sb-wrap sb-stats">
+      <div class="sb-stat"><span class="sb-stat__num">3</span><span class="sb-stat__label">분리된 repo<br>CI · GitOps · App</span></div>
+      <div class="sb-stat"><span class="sb-stat__num">6</span><span class="sb-stat__label">MSA 서비스<br>VulnBank 워크로드</span></div>
+      <div class="sb-stat"><span class="sb-stat__num">6</span><span class="sb-stat__label">보안 스캔 계층<br>SAST·SCA·secret·IaC·K8s·SBOM</span></div>
+      <div class="sb-stat"><span class="sb-stat__num sb-stat__num--accent">0→4</span><span class="sb-stat__label">SAST→DAST recall<br>계층방어 정량 근거</span></div>
+    </div>
+  </section>
+
+  <!-- ===================== WHY ===================== -->
+  <section class="sb-section">
+    <div class="sb-wrap">
+      <header class="sb-head">
+        <p class="sb-kicker">Why</p>
+        <h2 class="sb-h2">평가 도구가 아니라, 실행하고 증명하는 Golden Path</h2>
+        <p class="sb-lead">체크리스트로 점수를 매기는 진단 도구와 다릅니다. 알려진 취약 워크로드를 파이프라인에 통과시켜 <strong>각 도구가 무엇을 잡고 무엇을 놓치는지</strong> 실제 결과로 보여주고, 부족한 통제를 IaC로 즉시 구현합니다.</p>
+      </header>
+      <div class="sb-why">
+        <article class="sb-why__item"><h3>선언이 아닌 실측</h3><p>“스캐너를 돌렸다”가 아니라 “CVE 1,319건을 잡아 게이트가 BLOCK 했다”. 모든 주장은 빌드 증적에 근거합니다.</p></article>
+        <article class="sb-why__item"><h3>단일 도구의 사각 입증</h3><p>SAST는 의도된 4개 취약점을 0/4로 놓쳤습니다. 그 사각을 DAST·런타임이 메우는 계층방어를 숫자로 증명합니다.</p></article>
+        <article class="sb-why__item"><h3>재현 가능한 오픈소스</h3><p>terraform + user-data 부트스트랩으로 누구나 동일한 Golden Path를 세우고 같은 벤치마크를 재현합니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEATURES ===================== -->
+  <section class="sb-section sb-section--alt">
+    <div class="sb-wrap">
+      <header class="sb-head">
+        <p class="sb-kicker">Capabilities</p>
+        <h2 class="sb-h2">핵심 기능</h2>
+        <p class="sb-lead">개발자 push 한 번이 거치는 통제와, 그 통제가 담당하는 OWASP 레이어.</p>
+      </header>
+      <div class="sb-features">
+        <a class="sb-feature" href="{{ 'ci-security-pipeline/' | url }}">
+          <span class="sb-feature__icon">{% include ".icons/material/source-branch-sync.svg" %}</span>
+          <h3>Shift-left CI 파이프라인</h3>
+          <p>Jenkins 18-stage. 빌드 전 SAST·secret·IaC, 빌드 후 SBOM·이미지 CVE → Security Gate → Harbor.</p>
+          <span class="sb-feature__more">파이프라인 →</span>
+        </a>
+        <a class="sb-feature" href="{{ 'detection-efficacy/' | url }}">
+          <span class="sb-feature__icon">{% include ".icons/material/layers-triple.svg" %}</span>
+          <h3>계층방어 · 탐지 효능</h3>
+          <p>도구별 OWASP/CWE/CVE 매핑과 정탐·오탐 지표. SAST 0/4를 DAST가 메우는 근거.</p>
+          <span class="sb-feature__more">정탐/오탐 →</span>
+        </a>
+        <a class="sb-feature" href="{{ 'security-scenarios/' | url }}">
+          <span class="sb-feature__icon">{% include ".icons/material/clipboard-text-search.svg" %}</span>
+          <h3>보안 시나리오</h3>
+          <p>상황 → 보안담당자 질문 → 통제 → 증적. 취약 이미지 차단, 신규 CVE 재평가, DAST 비즈로직.</p>
+          <span class="sb-feature__more">시나리오 →</span>
+        </a>
+        <a class="sb-feature" href="{{ 'runtime-security/' | url }}">
+          <span class="sb-feature__icon">{% include ".icons/material/radar.svg" %}</span>
+          <h3>런타임 제로트러스트</h3>
+          <p>Cilium/Hubble eBPF, Falco, kube-bench. default-deny + 런타임 RCE 탐지·egress 차단.</p>
+          <span class="sb-feature__more">런타임 →</span>
+        </a>
+        <a class="sb-feature" href="{{ 'evidence-triage/' | url }}">
+          <span class="sb-feature__icon">{% include ".icons/material/file-document-check.svg" %}</span>
+          <h3>증적 & Triage</h3>
+          <p>DefectDojo로 도구 결과 통합·dedup·SLA. 오탐은 무시가 아니라 근거 있는 상태 전환.</p>
+          <span class="sb-feature__more">증적 →</span>
+        </a>
+        <a class="sb-feature" href="{{ 'isms-p-mapping/' | url }}">
+          <span class="sb-feature__icon">{% include ".icons/material/shield-check.svg" %}</span>
+          <h3>ISMS-P 통제 매핑</h3>
+          <p>보호대책 요구사항(2.x)에 각 통제를 매핑. 탐지 결과를 규제 이행 증거로 번역.</p>
+          <span class="sb-feature__more">규제 매핑 →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <section class="sb-section">
+    <div class="sb-wrap">
+      <header class="sb-head">
+        <p class="sb-kicker">How it works</p>
+        <h2 class="sb-h2">골든패스 흐름</h2>
+      </header>
+      <ol class="sb-steps">
+        <li><span class="sb-steps__n">1</span><div><strong>Push</strong><p>개발자가 GitHub에 코드를 push.</p></div></li>
+        <li><span class="sb-steps__n">2</span><div><strong>CI 보안검사</strong><p>Jenkins가 SAST·secret·IaC·SBOM·이미지 CVE를 스캔하고 게이트로 판정.</p></div></li>
+        <li><span class="sb-steps__n">3</span><div><strong>Harbor</strong><p>통과 이미지를 레지스트리에 push, 증적 아카이브.</p></div></li>
+        <li><span class="sb-steps__n">4</span><div><strong>GitOps 배포</strong><p>ArgoCD가 k3s에 자동 동기화(Git = 단일 진실).</p></div></li>
+        <li><span class="sb-steps__n">5</span><div><strong>런타임 보안</strong><p>Cilium·Falco가 실행 중 행위를 관측·차단.</p></div></li>
+        <li><span class="sb-steps__n">6</span><div><strong>증적·Triage</strong><p>모든 결과가 DefectDojo로 모여 보안담당자가 triage.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ===================== KILLER METRIC ===================== -->
+  <section class="sb-section sb-section--dark">
+    <div class="sb-wrap">
+      <header class="sb-head sb-head--light">
+        <p class="sb-kicker sb-kicker--light">Evidence · Build #3</p>
+        <h2 class="sb-h2">이론이 아니라 측정된 결과</h2>
+        <p class="sb-lead sb-lead--light">실제 AWS 파이프라인 1회 실행에서 나온 정량 지표입니다.</p>
+      </header>
+      <div class="sb-proof">
+        <div class="sb-proof__card"><span>29 / 1,319</span><p>이미지 CRITICAL / HIGH CVE → Gate <strong>BLOCK</strong></p></div>
+        <div class="sb-proof__card"><span>0 / 4</span><p>SAST 의도취약점 recall → DAST·런타임이 보완</p></div>
+        <div class="sb-proof__card"><span>D · PASS</span><p>보안등급 D인데 기본 게이트는 통과 — 게이트 설계의 함정</p></div>
+        <div class="sb-proof__card"><span>26 / 33</span><p>Kubescape CIS 준수 컨트롤 (NSA 14/20)</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CTA ===================== -->
+  <section class="sb-section sb-cta-final">
+    <div class="sb-wrap">
+      <h2 class="sb-h2">전체 설계와 데이터를 확인해 보세요</h2>
+      <div class="sb-cta">
+        <a href="{{ 'overview/' | url }}" class="md-button md-button--primary">기술 블로그 읽기</a>
+        <a href="{{ 'detection-efficacy/' | url }}" class="md-button">정탐/오탐 지표</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block content %}{% endblock %}
+{% block footer %}{{ super() }}{% endblock %}
