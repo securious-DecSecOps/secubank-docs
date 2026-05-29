@@ -68,6 +68,7 @@ markdown_extensions:
 
 nav:
   - 개요: index.md
+  - 기술 블로그: overview.md
   - 아키텍처: architecture.md
   - CI 보안 파이프라인: ci-security-pipeline.md
   - 보안 시나리오: security-scenarios.md
