@@ -1,5 +1,9 @@
 # Architecture
 
+![SecuBank DevSecOps Golden Path 아키텍처](assets/img/architecture.png){ loading=lazy }
+
+> 3-VM target 아키텍처 — VulnBank는 **runtime k3s** 위에서 동작한다. `diagram/architecture.py`(diagram-as-code)로 생성되어 **재현 가능**하다. 점선·"planned" 표기(SSM 시크릿, SNS 알림, Prometheus/Grafana)는 아직 미구현이다.
+
 ## Repository model
 
 PoC는 역할별로 3개 정본 repo를 분리한다.

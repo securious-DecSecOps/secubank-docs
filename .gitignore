@@ -1,9 +1,12 @@
-.cache/
-site/
+
 *.log
 *.tmp
 .DS_Store
-__pycache__/
+.cache/
+.diagram-venv/
 .venv/
-venv/
+__pycache__/
+diagram/architecture.png
 node_modules/
+site/
+venv/
