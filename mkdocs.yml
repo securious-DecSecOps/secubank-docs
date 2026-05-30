@@ -102,6 +102,9 @@ nav:
     - 2화 · 근데 이걸 누가 다 돌려요?: textbook/02-pipeline.md
     - 3화 · API 키가 깃허브에 올라갔어요: textbook/03-gitleaks.md
     - 4화 · 음수로 송금했더니 잔액이 늘어요: textbook/04-sast.md
+    - 5화 · 남의 거래내역이 보여요: textbook/05-dast.md
+    - 6화 · 컨테이너가 root로 돌아요: textbook/06-iac.md
+    - 7화 · 이미지에 CVE가 6천 개?: textbook/07-trivy.md
   - 아키텍처: architecture.md
   - 보안 도구 원리: security-tools.md
   - CI 보안 파이프라인: ci-security-pipeline.md
