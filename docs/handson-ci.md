@@ -80,6 +80,27 @@ grep -E "Pipeline\] \{ \(|Finished:" /var/lib/jenkins/jobs/vulnbank-msa-ci/build
 
 - **볼 것**: 실제 돌아간 건 **7개 도구 전부**(Gitleaks·SonarQube·Checkov·Kubescape·SBOM·Trivy + 게이트)를 거치는 18-stage다. 빌드 전(시크릿·SAST·IaC·K8s) → 빌드·SBOM·이미지CVE → 게이트 → 레지스트리 → 증적 순서가 로그에 그대로 찍혀 있다.
 
+### Security Gate 단계만 떼어 보기 — "관측 모드"의 실물
+
+```bash
+sed -n '/(Security Gate)/,/(Registry Login)/p' /var/lib/jenkins/jobs/vulnbank-msa-ci/builds/3/log \
+ | grep -aiE 'GATE_MAX|ENFORCE|OVERALL|GATE_RESULT|BLOCKED' | head
+```
+`sed -n '/A/,/B/p'` = A줄부터 B줄까지만 인쇄 → *그 단계 구간만* 잘라낸다. 빌드 #3의 실측:
+
+```text
+OVERALL_GATE_RESULT=BLOCK            # 게이트 종합 판정: 막아야 함
+BLOCKED_SERVICE_COUNT=6              # 6개 서비스가 임계 초과(Trivy)
+CHECKOV_GATE_RESULT=PASS            # Checkov 통과
+GITLEAKS_GATE_RESULT=BLOCK          # Gitleaks 시크릿 발견 → BLOCK
+WARN: ... result is BLOCK, but ENFORCE_GATE=false allows continuation.
+MSA security gate evaluation complete (result=BLOCK, enforce=false).
+```
+
+두 가지가 드러난다.
+- **다도구 종합 게이트**: `GITLEAKS_GATE_RESULT`·`CHECKOV_GATE_RESULT`·`OVERALL_GATE_RESULT` — 게이트는 Trivy만이 아니라 여러 도구 결과를 *종합*해 판정한다([9화](textbook/09-security-gate.md)의 그 게이트가 맞다).
+- **관측 모드(거짓말 ②의 실물)**: 판정은 `BLOCK`인데 `ENFORCE_GATE=false`라 빌드는 *계속 진행*돼 `SUCCESS`로 끝난다. 즉 *지금 이 클러스터에선 시크릿·CRITICAL이 든 빌드도 배포된다.* 이건 버그가 아니라 정책 선택이며, "누가·왜·언제까지 false로 뒀나"가 9화가 묻는 거버넌스 질문이다.
+
 ## 3. 빌드 엔진 — Docker
 
 ```bash
