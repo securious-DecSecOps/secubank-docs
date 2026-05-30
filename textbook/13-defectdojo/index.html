@@ -1,0 +1,1908 @@
+
+<!doctype html>
+<html lang="ko" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="금융권 보안담당자 실무를 Kubernetes 파이프라인으로 재현한 DevSecOps Golden Path PoC">
+      
+      
+      
+        <link rel="canonical" href="https://securious-decsecops.github.io/secubank-docs/textbook/13-defectdojo/">
+      
+      
+        <link rel="prev" href="../12-falco/">
+      
+      
+        <link rel="next" href="../99-epilogue/">
+      
+      
+      <link rel="icon" href="../../assets/brand/favicon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
+    
+    
+      
+        <title>13화 · 보안팀은 이걸 어디서 봐요? - VulnBank MSA DevSecOps Golden Path</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="13화 · 보안팀은 이걸 어디서 봐요? - VulnBank MSA DevSecOps Golden Path" >
+      
+        <meta  property="og:description"  content="금융권 보안담당자 실무를 Kubernetes 파이프라인으로 재현한 DevSecOps Golden Path PoC" >
+      
+        <meta  property="og:image"  content="https://securious-decsecops.github.io/secubank-docs/assets/images/social/textbook/13-defectdojo.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://securious-decsecops.github.io/secubank-docs/textbook/13-defectdojo/" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="13화 · 보안팀은 이걸 어디서 봐요? - VulnBank MSA DevSecOps Golden Path" >
+      
+        <meta  name="twitter:description"  content="금융권 보안담당자 실무를 Kubernetes 파이프라인으로 재현한 DevSecOps Golden Path PoC" >
+      
+        <meta  name="twitter:image"  content="https://securious-decsecops.github.io/secubank-docs/assets/images/social/textbook/13-defectdojo.png" >
+      
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue-grey" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#13" class="md-skip">
+          콘텐츠로 이동
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="상단/헤더">
+    <a href="../.." title="VulnBank MSA DevSecOps Golden Path" class="md-header__button md-logo" aria-label="VulnBank MSA DevSecOps Golden Path" data-md-component="logo">
+      
+  <img src="../../assets/brand/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            VulnBank MSA DevSecOps Golden Path
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              13화 · 보안팀은 이걸 어디서 봐요?
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="blue-grey" data-md-color-accent="cyan"  aria-label="다크 모드"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="다크 모드" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue-grey" data-md-color-accent="cyan"  aria-label="라이트 모드"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="라이트 모드" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="검색" placeholder="검색" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="검색">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="공유" aria-label="공유" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="지우기" aria-label="지우기" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            검색 초기화
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/securious-DecSecOps/secubank-docs" title="저장소로 이동" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    securious-DecSecOps/secubank-docs
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="탭" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  개요
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../overview/" class="md-tabs__link">
+        
+  
+    
+  
+  기술 블로그
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+    
+  
+  실전 교본
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../architecture/" class="md-tabs__link">
+        
+  
+    
+  
+  아키텍처
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../usecases/" class="md-tabs__link">
+        
+  
+    
+  
+  유스케이스로 본 시스템
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../security-tools/" class="md-tabs__link">
+        
+  
+    
+  
+  보안 도구 원리
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../ci-security-pipeline/" class="md-tabs__link">
+        
+  
+    
+  
+  CI 보안 파이프라인
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../security-scenarios/" class="md-tabs__link">
+        
+  
+    
+  
+  보안 시나리오
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../detection-efficacy/" class="md-tabs__link">
+        
+  
+    
+  
+  탐지 효능(정탐/오탐)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../supply-chain-defense/" class="md-tabs__link">
+        
+  
+    
+  
+  공급망 방어
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../reproduce/" class="md-tabs__link">
+        
+  
+    
+  
+  증적 재현 런북
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../operator-runbook/" class="md-tabs__link">
+        
+  
+    
+  
+  운영자 런북(접속·로그·연동)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../handson-ci/" class="md-tabs__link">
+        
+  
+    
+  
+  실습 가이드 · CI 하나하나 보기
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../build-wiring/" class="md-tabs__link">
+        
+  
+    
+  
+  구축·연결 원리 (end-to-end)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../runtime-security/" class="md-tabs__link">
+        
+  
+    
+  
+  런타임 보안
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../deep-dive-k3s-cilium/" class="md-tabs__link">
+        
+  
+    
+  
+  기술 심화 · k3s 컨트롤플레인·Cilium
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../deep-dive-ci/" class="md-tabs__link">
+        
+  
+    
+  
+  기술 심화 · CI 파이프라인 원리
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../deep-dive-mechanisms/" class="md-tabs__link">
+        
+  
+    
+  
+  기술 심화 · 메커니즘 해부 & 장애 복기
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../evidence-triage/" class="md-tabs__link">
+        
+  
+    
+  
+  증적 & Triage
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../exception-handling/" class="md-tabs__link">
+        
+  
+    
+  
+  예외·오탐 처리 구조
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../isms-p-mapping/" class="md-tabs__link">
+        
+  
+    
+  
+  ISMS-P 매핑
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../adoption/" class="md-tabs__link">
+        
+  
+    
+  
+  도입 가이드(온프레·하이브리드)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../onboarding-scenario/" class="md-tabs__link">
+        
+  
+    
+  
+  도입 시나리오(CI/CD 온보딩)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../code-map/" class="md-tabs__link">
+        
+  
+    
+  
+  코드·설정 맵
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../limitations/" class="md-tabs__link">
+        
+  
+    
+  
+  한계 및 향후 과제
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="네비게이션" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="VulnBank MSA DevSecOps Golden Path" class="md-nav__button md-logo" aria-label="VulnBank MSA DevSecOps Golden Path" data-md-component="logo">
+      
+  <img src="../../assets/brand/logo.svg" alt="logo">
+
+    </a>
+    VulnBank MSA DevSecOps Golden Path
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/securious-DecSecOps/secubank-docs" title="저장소로 이동" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    securious-DecSecOps/secubank-docs
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    개요
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    기술 블로그
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    실전 교본
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            실전 교본
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-infra/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1화 · 그거 어디서 돌릴 건데요?
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-pipeline/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2화 · 근데 이걸 누가 다 돌려요?
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-gitleaks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3화 · API 키가 깃허브에 올라갔어요
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-sast/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4화 · 음수로 송금했더니 잔액이 늘어요
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-dast/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5화 · 남의 거래내역이 보여요
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-iac/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6화 · 컨테이너가 root로 돌아요
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-trivy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    7화 · 이미지에 CVE가 6천 개?
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-sbom-rescan/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    8화 · 어제 통과한 게 오늘 위험해졌어요
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-security-gate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    9화 · 등급 D인데 왜 통과됐죠?
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-gitops/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    10화 · 누가 운영 이미지를 손으로 바꿨어요
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-cilium/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    11화 · 악성코드가 데이터를 빼돌려요
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-falco/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    12화 · 웹쉘이 떴는데 아무도 몰랐어요
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    13화 · 보안팀은 이걸 어디서 봐요?
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    13화 · 보안팀은 이걸 어디서 봐요?
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="목차">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      목차
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#defectdojo" class="md-nav__link">
+    <span class="md-ellipsis">
+      도구는 발견을, DefectDojo는 관리를
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      같은 취약점을 두 도구가 잡으면 — 중복 제거
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      정직한 현재 위치
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a" class="md-nav__link">
+    <span class="md-ellipsis">
+      A가 정리한 자리들
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      처음과 끝
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../99-epilogue/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    에필로그 · 그래서, axios를 막나요?
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    아키텍처
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usecases/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    유스케이스로 본 시스템
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security-tools/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    보안 도구 원리
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ci-security-pipeline/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CI 보안 파이프라인
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security-scenarios/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    보안 시나리오
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../detection-efficacy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    탐지 효능(정탐/오탐)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../supply-chain-defense/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    공급망 방어
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reproduce/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    증적 재현 런북
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operator-runbook/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    운영자 런북(접속·로그·연동)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../handson-ci/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    실습 가이드 · CI 하나하나 보기
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../build-wiring/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    구축·연결 원리 (end-to-end)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime-security/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    런타임 보안
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deep-dive-k3s-cilium/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    기술 심화 · k3s 컨트롤플레인·Cilium
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deep-dive-ci/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    기술 심화 · CI 파이프라인 원리
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deep-dive-mechanisms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    기술 심화 · 메커니즘 해부 & 장애 복기
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../evidence-triage/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    증적 & Triage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exception-handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    예외·오탐 처리 구조
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../isms-p-mapping/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ISMS-P 매핑
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    도입 가이드(온프레·하이브리드)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../onboarding-scenario/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    도입 시나리오(CI/CD 온보딩)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code-map/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    코드·설정 맵
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../limitations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    한계 및 향후 과제
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="목차">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      목차
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#defectdojo" class="md-nav__link">
+    <span class="md-ellipsis">
+      도구는 발견을, DefectDojo는 관리를
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      같은 취약점을 두 도구가 잡으면 — 중복 제거
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      정직한 현재 위치
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a" class="md-nav__link">
+    <span class="md-ellipsis">
+      A가 정리한 자리들
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      처음과 끝
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="13">13화 · "보안팀은 이걸 어디서 봐요?"<a class="headerlink" href="#13" title="Permanent link">&para;</a></h1>
+<p>12화까지, A는 모든 무기를 손에 넣었다. 그런데 보안팀장이 자리로 와서 던진 질문에, A는 답을 못 했다.</p>
+<blockquote>
+<p>"지금 우리 결제 서비스 위험이 <em>총 몇 건</em>이야? 어제보다 나아졌어? 그 IDOR은 누가 언제까지 고치기로 했지? 그리고 — 같은 취약점을 Trivy랑 SBOM이 둘 다 잡았으면, 그거 두 건이야 한 건이야?"</p>
+</blockquote>
+<p>A는 일곱 개 탭을 열었다. SonarQube, Gitleaks 리포트, Trivy JSON, ZAP 결과, Falco 로그, Hubble, 게이트 요약… 어디에도 "총 위험 N건, 담당자, 기한"을 <em>한 화면</em>으로 보여주는 곳은 없었다. 도구는 <em>발견</em>을 만든다. 그런데 보안팀이 필요한 건 발견이 아니라 <strong>관리</strong>다 — 중복 제거된 총량, 생애주기(열림→트리아지→수정→검증), 담당자, 기한, 추세.</p>
+<blockquote>
+<p>A: "발견은 일곱 군데 있는데… 보안팀은 이걸 <em>어디서</em> 봐요?"</p>
+</blockquote>
+<p>이게 마지막 빈틈이다. 그리고 가장 많은 조직이 빠지는 함정이다 — 도구는 잔뜩 깔았는데, 그 결과를 <em>관리할 단일 평면</em>이 없다.</p>
+<h2 id="defectdojo">도구는 발견을, DefectDojo는 관리를<a class="headerlink" href="#defectdojo" title="Permanent link">&para;</a></h2>
+<p>1화에서 띄운 세 번째 VM, 기억하는가 — <em>증적용 DefectDojo</em>. 12화 동안 비어 있던 그 VM이 여기서 일을 시작한다.</p>
+<p>DefectDojo는 <strong>ASOC</strong>(Application Security Orchestration &amp; Correlation) 도구다. 핵심은 이 프로젝트의 증적 문서에 적힌 한 줄에 있다 — <em>"DefectDojo는 로그 저장소가 아니라 findings lifecycle 관리 도구다."</em> 일곱 도구의 출력을 한곳에 빨아들여 중복을 합치고, 생애주기를 추적하고, 담당과 기한을 붙이고, 추세를 측정한다. 흩어진 <em>발견</em>을, 관리되는 <em>위험</em>으로 바꾼다.</p>
+<p>연결의 비결은 — 또다시 2화의 <code>REPORT_DIR</code> 규약이다.</p>
+<div class="highlight"><span class="filename">CI → DefectDojo 입수 흐름 (증적 통합 설계)</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>REPORT_DIR/gitleaks/*.json   ─┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>REPORT_DIR/trivy/*.json       ├─ scan_type별 import-scan API ─→ DefectDojo
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>REPORT_DIR/checkov/*.json     │     (Product: VulnBank-MSA,
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>REPORT_DIR/sbom/*.cdx.json    ─┘      Engagement: dev-build-N)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>   ─── 측면 입력 ───
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>Falco · Hubble · DAST · SBOM 재평가(신규 CVE)
+</code></pre></div>
+<p>각 도구가 <em>자기 칸</em>에 떨군 JSON을, DefectDojo의 <code>import-scan</code> API가 <em>도구별 파서</em>(<code>scan_type</code>)로 읽어들인다. Gitleaks는 Gitleaks 파서로, Trivy는 Trivy 파서로, SBOM(CycloneDX)은 그 파서로. 2화에서 "새 도구는 자기 칸에 JSON만 쓰면 된다"던 그 느슨한 결합이, 여기서 <em>증적 통합</em>으로 결실을 맺는다 — 도구를 추가하면 DefectDojo 입수도 한 줄 늘 뿐이다.</p>
+<h2 id="_1">같은 취약점을 두 도구가 잡으면 — 중복 제거<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>팀장의 까다로운 질문 — "Trivy랑 SBOM이 같은 CVE를 둘 다 잡았으면 한 건이야 두 건이야?" — 이 ASOC의 존재 이유다. DefectDojo는 <em>중복 제거(deduplication)</em>와 <em>상관(correlation)</em>을 한다. 같은 컴포넌트의 같은 CVE를 여러 스캔이 보고하면, 하나의 finding으로 합치고 <em>어디서 발견됐는지</em>만 여러 출처로 단다. 그래야 "우리 위험 총 N건"이 <em>부풀려지지 않은 진짜 숫자</em>가 된다. 도구 일곱 개의 합이 아니라, 중복을 걷어낸 실제 위험의 크기.</p>
+<p>그리고 각 finding엔 <em>생애주기</em>가 붙는다. Active → 트리아지(진짜냐 오탐이냐) → 담당자 지정 → 수정 → 재검증 → Closed. 11·12화의 런타임 증적(Falco 웹쉘 경보, Hubble DROPPED)과 8화의 SBOM 신규 CVE도 <em>측면 입력</em>으로 합류한다. 빌드 타임 발견과 런타임 증적이 한 평면에서 만나는 것 — 이게 "단일 화면(single pane of glass)"의 진짜 의미다.</p>
+<h2 id="_2">정직한 현재 위치<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>미화하지 말자. 이 PoC의 DefectDojo 통합은 <em>완성형이 아니다.</em> 증적 문서가 정직하게 적고 있다 — 전용 VM에서 Gitleaks·Trivy·Checkov·SBOM(CycloneDX) import는 <em>동작</em>하지만(별도 Jenkins job), 메인 파이프라인으로의 import 스테이지 통합과 SonarQube API import는 <em>진행 중</em>이다. 즉 "되는 것"과 "되게 하는 중인 것"이 섞여 있다. 그걸 <em>섞어서 다 된다고 말하지 않는 것</em>이, 이 교본이 처음부터 지킨 약속이다.</p>
+<p>더 근본적인 한계 — DefectDojo는 <em>아무것도 새로 찾지 않는다.</em> 입수한 것만 보여준다. 들어온 게 쓰레기면 나가는 것도 쓰레기다(garbage in, garbage out). 파서·중복 규칙을 잘못 잡으면 <em>진짜 위험이 중복으로 묻히거나 오탐이 부풀려진다.</em> 그리고 결국 — DefectDojo가 보여주는 "위험 N건"을 <em>누가 매일 보고, 누가 트리아지하고, 누가 기한을 지키는지</em>가 없으면 그건 그냥 <em>예쁜 대시보드</em>다. 도구가 관리를 <em>가능하게</em> 하지, 관리를 <em>대신</em>하진 않는다.</p>
+<p>그렇다면 그 사이 — DefectDojo가 다 받아주기 전 — 오탐과 위험 수용은 어디에 어떻게 쌓이나? 이 PoC는 게이트 단계에 <em>코드화된 예외 레지스터</em>(근거·승인자·만료일이 git으로 버전관리되고, 만료되면 자동으로 다시 차단되는)를 두어 그 빈자리를 메웠다. 그 구조와 실측 증적은 <a href="../../exception-handling/">예외·오탐 처리 구조</a>에 따로 정리했다.</p>
+<h2 id="a">A가 정리한 자리들<a class="headerlink" href="#a" title="Permanent link">&para;</a></h2>
+<p>기술적으로 DefectDojo는 <code>REPORT_DIR</code> 규약을 타고 일곱 도구의 출력을 scan_type별 파서로 입수해, 중복 제거·상관·생애주기 추적으로 <em>흩어진 발견을 관리되는 위험으로</em> 통합한다 — 빌드 타임과 런타임 증적이 한 평면에서 만난다. 규제로 옮기면, 이 단일 평면은 ISMS-P 2.11(취약점 관리의 <em>지속적</em> 운영)과 2.9(로그·증적 관리)를 충족하고, "발견→조치→검증"의 추적 가능성은 감사와 경영 보고의 핵심 산출물이 된다. 정책의 영역에서, 심각도별 <em>조치 SLA</em>(예: Critical 7일, High 30일)와 오탐 처리 규칙이 정책이 되고 DefectDojo가 그 SLA 준수 여부를 <em>측정</em>한다. 그리고 관리의 영역 — 이 장은 그 자체로 <em>거버넌스의 도구</em>다. 그동안 매 장 끝 '관리' 렌즈에서 말한 "누가 위험을 소유하고 추적하는가"의 답이, 바로 이 단일 평면이다. 위험의 총량·추세·담당·기한이 한 화면에 모일 때, 비로소 보안은 <em>도구의 집합</em>이 아니라 <em>관리되는 프로그램</em>이 된다.</p>
+<p>A가 13화에서 얻은 문장. <strong>도구는 위험을 <em>발견</em>하고, DefectDojo는 위험을 <em>경영</em>한다.</strong></p>
+<p><img alt="최종 아키텍처 (STAGE 6) · 빈 VM 세 대가 13화 만에 이렇게 됐다" loading="lazy" src="../../assets/img/textbook/textbook-stage6.png" /></p>
+<h2 id="_3">처음과 끝<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>1화의 빈 VM 세 대가, 13화 만에 위 그림이 됐다. terraform이 작업장을 세우고, 파이프라인이 일곱 도구를 엮고, 게이트가 정책을 집행하고, GitOps가 충실히 배포하고, Cilium·Falco가 런타임을 지키고, DefectDojo가 모든 위험을 한 화면에 모은다. A는 이제 금요일 밤의 그 질문 앞에 설 수 있다.</p>
+<blockquote>
+<p>다음 → <strong>에필로그 · "그래서, axios를 막나요?"</strong> — 13화를 통과한 A의, 정직한 결론</p>
+</blockquote>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  맨위로
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="하단/푸터" >
+        
+          
+          <a href="../12-falco/" class="md-footer__link md-footer__link--prev" aria-label="이전: 12화 · 웹쉘이 떴는데 아무도 몰랐어요">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                이전
+              </span>
+              <div class="md-ellipsis">
+                12화 · 웹쉘이 떴는데 아무도 몰랐어요
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../99-epilogue/" class="md-footer__link md-footer__link--next" aria-label="다음: 에필로그 · 그래서, axios를 막나요?">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                다음
+              </span>
+              <div class="md-ellipsis">
+                에필로그 · 그래서, axios를 막나요?
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.tracking", "navigation.indexes", "navigation.footer", "navigation.path", "content.tabs.link", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "toc.follow"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "\ud074\ub9bd\ubcf4\ub4dc\uc5d0 \ubcf5\uc0ac\ub428", "clipboard.copy": "\ud074\ub9bd\ubcf4\ub4dc\ub85c \ubcf5\uc0ac", "search.result.more.one": "\uc774 \ubb38\uc11c\uc5d0\uc11c 1\uac1c\uc758 \uac80\uc0c9 \uacb0\uacfc \ub354 \ubcf4\uae30", "search.result.more.other": "\uc774 \ubb38\uc11c\uc5d0\uc11c #\uac1c\uc758 \uac80\uc0c9 \uacb0\uacfc \ub354 \ubcf4\uae30", "search.result.none": "\uac80\uc0c9\uc5b4\uc640 \uc77c\uce58\ud558\ub294 \ubb38\uc11c\uac00 \uc5c6\uc2b5\ub2c8\ub2e4", "search.result.one": "1\uac1c\uc758 \uc77c\uce58\ud558\ub294 \ubb38\uc11c", "search.result.other": "#\uac1c\uc758 \uc77c\uce58\ud558\ub294 \ubb38\uc11c", "search.result.placeholder": "\uac80\uc0c9\uc5b4\ub97c \uc785\ub825\ud558\uc138\uc694", "search.result.term.missing": "\ud3ec\ud568\ub418\uc9c0 \uc54a\uc740 \uac80\uc0c9\uc5b4", "select.version": "\ubc84\uc804 \uc120\ud0dd"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.88dd0f4e.min.js"></script>
+      
+        <script src="../../javascripts/reveal.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
