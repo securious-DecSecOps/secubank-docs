@@ -62,11 +62,23 @@ ls -1 /var/lib/jenkins/jobs/
 `/var/lib/jenkins`가 Jenkins의 집(JENKINS_HOME). *잡 = 디렉터리 하나*.
 
 ```bash
-ls /var/lib/jenkins/jobs/vulnbank-msa-ci/builds/
-cat /var/lib/jenkins/jobs/vulnbank-msa-ci/builds/3/log | tail -40
+ls /var/lib/jenkins/jobs/vulnbank-msa-ci/builds/      # 1  2  3  permalinks
+grep -E "Pipeline\] \{ \(|Finished:" /var/lib/jenkins/jobs/vulnbank-msa-ci/builds/3/log
 ```
 - 빌드는 번호별 디렉터리(`builds/3/`)로 남고, `log`가 그 빌드의 *콘솔 출력*이다.
-- **볼 것**: 스테이지 진행(Checkout→Build→Trivy→Gate→Push→Deploy)과 마지막 결과.
+- 로그는 단계마다 `[Pipeline] { (스테이지)` 를 찍는다. grep으로 그 *관문 목록*만 뽑는다. (줄 앞의 `ha:////…` 는 Jenkins가 UI용으로 심는 base64 콘솔 주석 — 무시.)
+
+빌드 #3이 실제로 거친 **18단계**(로그 실측):
+
+```text
+1 Checkout SCM · 2 Checkout · 3 Preflight Tools · 4 Checkout App Source · 5 Checkout GitOps Repo · 6 Prepare Metadata
+7 Gitleaks Secret Scan · 8 SonarQube SAST · 9 Checkov IaC Scan · 10 Kubescape K8s Manifest Scan
+11 Docker Build Services · 12 Generate SBOM · 13 Trivy Scan Services · 14 Security Gate
+15 Registry Login · 16 Registry Push Services · 17 Collect CI Evidence · 18 Archive Evidence
+→ Finished: SUCCESS
+```
+
+- **볼 것**: 실제 돌아간 건 **7개 도구 전부**(Gitleaks·SonarQube·Checkov·Kubescape·SBOM·Trivy + 게이트)를 거치는 18-stage다. 빌드 전(시크릿·SAST·IaC·K8s) → 빌드·SBOM·이미지CVE → 게이트 → 레지스트리 → 증적 순서가 로그에 그대로 찍혀 있다.
 
 ## 3. 빌드 엔진 — Docker
 
