@@ -107,6 +107,8 @@ nav:
     - 7화 · 이미지에 CVE가 6천 개?: textbook/07-trivy.md
     - 8화 · 어제 통과한 게 오늘 위험해졌어요: textbook/08-sbom-rescan.md
     - 9화 · 등급 D인데 왜 통과됐죠?: textbook/09-security-gate.md
+    - 10화 · 누가 운영 이미지를 손으로 바꿨어요: textbook/10-gitops.md
+    - 11화 · 악성코드가 데이터를 빼돌려요: textbook/11-cilium.md
   - 아키텍처: architecture.md
   - 보안 도구 원리: security-tools.md
   - CI 보안 파이프라인: ci-security-pipeline.md
