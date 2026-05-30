@@ -17,19 +17,49 @@ aws ssm start-session --target i-01011276c12b34d2c --profile secubank --region a
 sudo -i      # root로 — Jenkins 파일·docker 소켓이 root 권한이라 필요
 ```
 
-## 1. Jenkins — 어디 살고, 어떻게 도나
+## 1. Jenkins — 어떻게 도나 (설정 → 프로세스 추적)
 
 ```bash
-systemctl status jenkins --no-pager | head -5
+systemctl status jenkins --no-pager | head -8
 ```
-- `systemctl` = systemd(리눅스 서비스 관리자)에게 묻는 명령. Jenkins가 *systemd 서비스*로 등록돼 돈다.
-- **볼 것**: `active (running)`, 그리고 실행줄에 `java ... jenkins.war --httpPort=8083`, Java 21. (Java 17이면 안 떠 — 1화의 그 함정.)
+`systemctl`은 systemd(리눅스 서비스 관리자)에게 묻는 명령. (인자 없이 `systemctl`만 치면 198개 유닛이 전부 쏟아진다 — 그래서 `status jenkins`로 *하나만* 좁힌다.) 출력 한 줄씩:
+
+| 줄 | 뜻 |
+| --- | --- |
+| `●` + 설명 | 초록 점 = 건강하게 가동 |
+| `Loaded: …; enabled;` | 유닛 위치 + **enabled = 부팅 시 자동 시작** |
+| `Drop-In: …/jenkins.service.d/override.conf` | ★ 원본을 안 건드리고 *덮어쓰는* 설정. 포트·Java가 여기 산다 |
+| `Active: active (running) since …` | 가동 시작 시각 |
+| `Main PID: … (java)` | **프로세스가 java** — Jenkins는 JVM 위 java 프로세스(jenkins.war) |
+
+커스터마이즈가 사는 Drop-In을 직접 보면:
+```bash
+cat /etc/systemd/system/jenkins.service.d/override.conf
+#  Environment="JENKINS_PORT=8083"                       ← 기본 8080을 8083으로
+#  Environment="JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto"  ← Java 21 강제(17이면 안 뜸)
+```
+
+그 설정이 *실제 프로세스에 반영됐는지* 확인:
+```bash
+ps -ef | grep "jenkins.war" | grep -v grep
+#  jenkins  219269  1  …  java-21-…/bin/java -Djava.awt.headless=true
+#           -jar /usr/share/java/jenkins.war --webroot=/var/cache/jenkins/war --httpPort=8083
+```
+- 맨 앞 **`jenkins`** = 실행 사용자(root 아님 — 최소권한. 단 docker 그룹이라 빌드는 가능).
+- `PPID=1` = systemd가 부모(관리되는 서비스). `?` = TTY 없는 데몬.
+- `java-21-…/bin/java … --httpPort=8083` = **override의 JENKINS_PORT=8083·JAVA_HOME이 그대로 흘러왔다.**
+
+> 핵심: `override.conf의 JENKINS_PORT=8083` → systemd → `java … --httpPort=8083`. *설정 한 줄이 떠 있는 포트로 이어지는 사슬*을 직접 따라간 것. 이게 "그냥 깔았다"와 "어떻게 도는지 안다"의 차이다.
+
+## 2. Jenkins가 뭘 하나 — 잡과 빌드
 
 ```bash
-ls /var/lib/jenkins/jobs/
+ls -1 /var/lib/jenkins/jobs/
+#  secubank-runtime-security
+#  secubank-sast-defectdojo-test   ← DefectDojo 연동 잡
+#  vulnbank-msa-ci                 ← 메인 파이프라인
 ```
-- Jenkins의 *잡*은 디렉터리 하나씩이다.
-- **볼 것**: `vulnbank-msa-ci`(메인 파이프라인) · `secubank-runtime-security` · `secubank-sast-defectdojo-test`(DefectDojo 연동 잡).
+`/var/lib/jenkins`가 Jenkins의 집(JENKINS_HOME). *잡 = 디렉터리 하나*.
 
 ```bash
 ls /var/lib/jenkins/jobs/vulnbank-msa-ci/builds/
@@ -38,7 +68,7 @@ cat /var/lib/jenkins/jobs/vulnbank-msa-ci/builds/3/log | tail -40
 - 빌드는 번호별 디렉터리(`builds/3/`)로 남고, `log`가 그 빌드의 *콘솔 출력*이다.
 - **볼 것**: 스테이지 진행(Checkout→Build→Trivy→Gate→Push→Deploy)과 마지막 결과.
 
-## 2. 빌드 엔진 — Docker
+## 3. 빌드 엔진 — Docker
 
 ```bash
 docker version --format 'server {{.Server.Version}}'
@@ -47,7 +77,7 @@ docker images | grep secubank | head
 - 이미지 빌드는 *호스트 Docker 데몬*이 한다(Jenkins가 docker 그룹).
 - **볼 것**: `10.0.1.169:8082/secubank/vulnbank-msa-*` 태그가 붙은 *우리가 빌드한* 이미지들. 태그 `10.0.1.169:8082`가 곧 "Harbor로 보낼 주소"다.
 
-## 3. Harbor — OCI 레지스트리
+## 4. Harbor — OCI 레지스트리
 
 ```bash
 docker ps --format '{{.Names}}\t{{.Status}}' | grep -i harbor
@@ -56,7 +86,7 @@ curl -s -o /dev/null -w 'GET /v2/ -> %{http_code}\n' http://localhost:8082/v2/
 - `curl` 토막: `-s` 조용히, `-o /dev/null` 본문 버림, `-w '%{http_code}'` HTTP 코드만 출력. `/v2/`는 OCI Distribution API 루트.
 - **볼 것**: Harbor는 컨테이너 *8개 스택*(core·registry·db·nginx·portal·jobservice·registryctl·log). 그리고 `/v2/ -> 401` — **익명 거부(인증 필요)**. 레지스트리가 열려 있지 않다는 증거.
 
-## 4. 스캐너 — 무엇으로 판단하나
+## 5. 스캐너 — 무엇으로 판단하나
 
 ```bash
 trivy --version; gitleaks version; checkov --version; syft version
@@ -71,7 +101,7 @@ trivy image --severity CRITICAL,HIGH alpine:3.12 | head -25
 - `trivy image <이미지>` = 그 이미지를 풀어 패키지 목록을 뽑고 DB와 대조. `--severity`로 등급 필터.
 - **볼 것**: 오래된 alpine이라 CVE가 줄줄 뜬다. "패키지 → 설치버전 → 취약버전 → 수정버전" 형식 = Trivy가 *매칭*하는 방식.
 
-## 5. SonarQube — 서버형 SAST
+## 6. SonarQube — 서버형 SAST
 
 ```bash
 docker ps --format '{{.Names}} {{.Status}}' | grep -i sonar
@@ -79,7 +109,7 @@ curl -s http://localhost:9000/api/system/status
 ```
 - **볼 것**: SonarQube는 CLI가 아니라 *컨테이너로 뜬 서버*(`{"status":"UP"}`). 스캐너가 결과를 *서버에 올리고* Quality Gate를 *되묻는다*. 그래서 SonarQube만 결과가 파일이 아니라 서버에 산다.
 
-## 6. 증적 — 워크스페이스에서 archive로
+## 7. 증적 — 워크스페이스에서 archive로
 
 ```bash
 ls /var/lib/jenkins/workspace/vulnbank-msa-ci/reports/dev/3/
