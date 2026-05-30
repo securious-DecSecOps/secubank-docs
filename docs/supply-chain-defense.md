@@ -43,19 +43,19 @@
 3. **런타임 egress 차단(Cilium)이 최후·최강 보완.** 악성 의존성이 모든 빌드 검사를 통과해 배포돼도, **외부로 못 나가면 RAT C2도 credential exfil도 실패**한다. 이건 *지금 구현돼 있고* 실증 가능 — VulnBank에 default-deny + allow 화이트리스트를 적용하면 "백엔드 파드의 외부 통신 차단"을 Hubble DROPPED로 보일 수 있다.
 4. **이미지 서명(Cosign/Kyverno)은 무결성의 정공법** — 단 현재 planned. TanStack형 CI 침해·이미지 변조를 정면 차단하려면 이게 필요. **로드맵 최우선 보강 후보.**
 
-→ **요약**: "axios/Shai-Hulud를 막느냐?" → **빌드(SCA known) + 시간(SBOM 재평가) + 런타임(Cilium egress·Falco) 3겹으로 *효과*를 막을 수 있고, 무결성 정면 차단(Cosign/Kyverno)은 다음 보강이다.** 단일 도구가 아니라 계층이 답이라는 것 자체가 evidence-driven 메시지.
+→ **요약**: "axios/Shai-Hulud를 막느냐?" → 침해의 *순간*은 못 막는다(예방 실패). 대신 **빌드(SCA known) + 시간(SBOM 재평가) + 런타임(Cilium egress·Falco) 3겹으로 *탐지하고 피해를 봉쇄*하며, 무결성 정면 차단(Cosign/Kyverno)은 다음 보강이다.** 단일 도구가 아니라 계층이 답이라는 것 자체가 evidence-driven 메시지.
 
 ## 4. 실증 가능성 (이론 아님)
 
 <div class="sb-key" markdown>
-아래 주장들은 **[증적 재현 런북](reproduce.md)** 으로 누구나 직접 확인할 수 있다 — 추가 VM 없이 기존 클러스터에서, VulnBank 네임스페이스에만 적용·롤백되는 비파괴 절차다. 실행해 증적을 캡처하면 이 페이지의 🟡가 ✅로 바뀐다.
+아래 주장들은 **[증적 재현 런북](reproduce.md)** 으로 누구나 직접 확인할 수 있다 — 추가 VM 없이 기존 클러스터에서, VulnBank 네임스페이스에만 적용·롤백되는 비파괴 절차다. 핵심 3종(egress 차단·Falco 탐지·SBOM 재평가)은 **AWS 라이브로 실증 완료**(증적 `reports/dev/aws-live/evidence-summary.md`)했고, 남은 ▢는 워크로드 추가 시의 다음 단계다.
 </div>
 
 | 주장 | 실증 방법 | 현재 |
 | --- | --- | --- |
-| "런타임 egress로 C2를 막는다" | VulnBank 파드에 default-deny CiliumNetworkPolicy 적용 → 외부 IP 호출이 Hubble에 DROPPED로 기록 | ✅ 가능(Cilium 동작 중, 정책 적용만) |
-| "Falco가 악성 행위를 잡는다" | 업로드된 웹쉘이 셸 spawn/네트워크 시도 → Falco 이벤트 | 🟡 웹쉘 아티팩트 존재, 트리거 시연 필요 |
-| "SBOM 재평가로 영향 버전을 찾는다" | 신규 CVE 가정 → 저장 SBOM을 `trivy sbom` 재스캔 → 영향 이미지 식별 | 🟡 SBOM 생성됨, 재스캔 잡 구성 필요 |
+| "런타임 egress로 C2를 막는다" | VulnBank 파드에 default-deny CiliumNetworkPolicy 적용 → 외부 IP 호출이 Hubble에 DROPPED로 기록 | ✅ 실증완료 — AWS 라이브 Hubble `DROPPED`(SYN), `http_code=000` (cmd `ba96945a`) |
+| "Falco가 악성 행위를 잡는다" | 업로드된 웹쉘이 셸 spawn/네트워크 시도 → Falco 이벤트 | ✅ 실증완료 — 룰 수정(rename syscall) 후 웹쉘 `Critical`(18:31:55)·셸 spawn 발화 |
+| "SBOM 재평가로 영향 버전을 찾는다" | 신규 CVE 가정 → 저장 SBOM을 `trivy sbom` 재스캔 → 영향 이미지 식별 | ✅ 실증완료 — `trivy sbom` 재스캔, 빌드 당시 없던 2026 CVE 3건 식별 |
 | "Node 워크로드면 axios류가 SBOM에 잡힌다" | Juice Shop(취약 npm) 워크로드를 파이프라인에 태움 → Syft SBOM에 axios 버전·Trivy advisory | ▢ 워크로드 추가 시(=다음) |
 
 ## 5. 연결
