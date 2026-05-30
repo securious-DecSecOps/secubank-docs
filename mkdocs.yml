@@ -98,7 +98,8 @@ nav:
   - 기술 블로그: overview.md
   - 실전 교본:
     - 교본 개요: textbook/index.md
-    - 1장 · 인프라: textbook/01-infra.md
+    - 1화 · 그거 어디서 돌릴 건데요?: textbook/01-infra.md
+    - 2화 · API 키가 깃허브에 올라갔어요: textbook/02-gitleaks.md
   - 아키텍처: architecture.md
   - 보안 도구 원리: security-tools.md
   - CI 보안 파이프라인: ci-security-pipeline.md
