@@ -121,6 +121,7 @@ nav:
   - 공급망 방어: supply-chain-defense.md
   - 증적 재현 런북: reproduce.md
   - 운영자 런북(접속·로그·연동): operator-runbook.md
+  - 실습 가이드 · CI 하나하나 보기: handson-ci.md
   - 런타임 보안: runtime-security.md
   - 기술 심화 · k3s 컨트롤플레인·Cilium: deep-dive-k3s-cilium.md
   - 기술 심화 · CI 파이프라인 원리: deep-dive-ci.md
