@@ -109,6 +109,9 @@ nav:
     - 9화 · 등급 D인데 왜 통과됐죠?: textbook/09-security-gate.md
     - 10화 · 누가 운영 이미지를 손으로 바꿨어요: textbook/10-gitops.md
     - 11화 · 악성코드가 데이터를 빼돌려요: textbook/11-cilium.md
+    - 12화 · 웹쉘이 떴는데 아무도 몰랐어요: textbook/12-falco.md
+    - 13화 · 보안팀은 이걸 어디서 봐요?: textbook/13-defectdojo.md
+    - 에필로그 · 그래서, axios를 막나요?: textbook/99-epilogue.md
   - 아키텍처: architecture.md
   - 보안 도구 원리: security-tools.md
   - CI 보안 파이프라인: ci-security-pipeline.md
