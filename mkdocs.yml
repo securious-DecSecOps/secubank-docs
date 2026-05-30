@@ -123,6 +123,7 @@ nav:
   - 런타임 보안: runtime-security.md
   - 기술 심화 · k3s 컨트롤플레인·Cilium: deep-dive-k3s-cilium.md
   - 기술 심화 · CI 파이프라인 원리: deep-dive-ci.md
+  - 기술 심화 · 메커니즘 해부 & 장애 복기: deep-dive-mechanisms.md
   - 증적 & Triage: evidence-triage.md
   - 예외·오탐 처리 구조: exception-handling.md
   - ISMS-P 매핑: isms-p-mapping.md
