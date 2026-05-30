@@ -117,13 +117,13 @@ trivy sbom user-service.spdx.json --severity CRITICAL,HIGH
 
 ## 결과 기록
 
-실행 후 아래 표를 갱신하고, 증적 파일 경로를 함께 남긴다. 그 순간 [공급망 방어](supply-chain-defense.md)의 🟡가 ✅로 바뀐다.
+핵심 3종은 **AWS 라이브로 실증 완료**했다(증적 `reports/dev/aws-live/evidence-summary.md`). 아래 표가 그 결과이며, 다른 환경에서 재현하면 같은 절차로 동일 증적을 캡처할 수 있다.
 
 | 실험 | 입증하는 주장 | 증적 | 상태 |
 | --- | --- | --- | --- |
-| 1 · egress 차단 | RAT C2·exfil 무력화 | Hubble `DROPPED` flow | <span class="st st--planned">미실행</span> |
-| 2 · Falco | 페이로드 실행 행위 탐지 | Falco CRITICAL·WARNING 로그 | <span class="st st--planned">미실행</span> |
-| 3 · SBOM 재스캔 | 시간축 재평가 | `trivy sbom` 출력 | <span class="st st--planned">미실행</span> |
+| 1 · egress 차단 | RAT C2·exfil 무력화 | Hubble `DROPPED`(SYN)·`http_code=000` (cmd `ba96945a`) | <span class="st st--done">실증완료</span> |
+| 2 · Falco | 페이로드 실행 행위 탐지 | 웹쉘 `Critical`(18:31:55)·셸 spawn `Warning`(룰 수정 후 발화) | <span class="st st--done">실증완료</span> |
+| 3 · SBOM 재스캔 | 시간축 재평가 | `trivy sbom` → 빌드 당시 없던 2026 CVE 3건 식별 | <span class="st st--done">실증완료</span> |
 
 <div class="sb-key" markdown>
 세 실험 모두 **VulnBank 네임스페이스에만** 작용하고 한 줄 명령으로 롤백된다. 같은 클러스터를 쓰는 다른 작업에는 영향이 없으며, **추가 VM도 만들지 않는다**. 누가 실행하든 같은 명령에서 같은 증적이 나오는 것 — 그것이 이 프로젝트가 "주장"과 다른 지점이다.
