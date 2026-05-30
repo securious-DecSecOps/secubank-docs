@@ -42,7 +42,7 @@ flowchart LR
 | 4 | IaC/K8s misconfig | manifest가 위험한 권한/네트워크/컨테이너 설정을 갖는가? | Checkov, Kubescape | `checkov/`, `kubescape/` |
 | 5 | 미신뢰 image | registry 외부 image 또는 서명 없는 image가 배포되는가? | TODO: Cosign/Kyverno VerifyImages | TODO |
 | 6 | GitOps drift | runtime 상태가 Git 선언과 달라졌는가? | ArgoCD self-heal | ArgoCD Application status |
-| 7 | DAST 비즈니스 로직 | IDOR, 음수 송금, 웹셸 업로드가 실제 HTTP 경로에서 재현되는가? | Custom verify + OWASP ZAP baseline | `reports/dev/wsl-poc/evidence/` |
+| 7 | DAST 비즈니스 로직 | IDOR, 음수 송금, 웹셸 업로드가 실제 HTTP 경로에서 재현되는가? | Custom verify + OWASP ZAP baseline | `aws-live/evidence-summary.md`(3/4, cmd `f36638de`) · 상세 `wsl-poc/evidence/` |
 | 8 | Runtime RCE | 컨테이너 내부 shell, PHP file write가 발생하는가? | Falco | Falco logs |
 | 9 | Runtime network abuse | 공격 후 비정상 egress 또는 lateral movement가 있는가? | Cilium/Hubble | Hubble flow |
 | 10 | Findings triage | 어떤 finding이 진짜 조치 대상이고 어떤 것은 accepted risk인가? | DefectDojo | TODO: DefectDojo engagement/product evidence |

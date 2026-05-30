@@ -20,14 +20,14 @@
 
 ## Ground truth
 
-VulnBank MSA에서 명시적으로 재현 대상으로 잡은 ground truth는 4개다.
+VulnBank MSA에서 명시적으로 재현 대상으로 잡은 ground truth는 4개다. AWS 라이브 재검증 요약은 `reports/dev/aws-live/evidence-summary.md`(SSM command-id `f36638de`, **DAST 3/4**)에 있고, VULN별 상세 request/response 캡처는 PoC 캡처본(`reports/dev/wsl-poc/evidence/*`)에 남아 있다.
 
-| ID | 취약점 | 검증 방식 | 현재 증적 |
+| ID | 취약점 | 검증 방식 | AWS 라이브 재검증 · 상세 캡처 |
 | --- | --- | --- | --- |
-| VULN-1 | 음수 송금 | Custom DAST script | `reports/dev/wsl-poc/evidence/02-negative-transfer.*` |
-| VULN-2 | 거래내역 IDOR | Custom DAST script | `reports/dev/wsl-poc/evidence/03-idor-transaction-history.*` |
-| VULN-3 | 사용자 정보 변경 IDOR | Custom DAST script | `reports/dev/wsl-poc/evidence/04-idor-user-update.*` |
-| VULN-4 | PHP webshell upload/RCE | Custom DAST script | `reports/dev/wsl-poc/evidence/05-*`, `06-*` |
+| VULN-1 | 음수 송금 | Custom DAST script | ✅ AWS 라이브(cmd `f36638de`) · 상세 `wsl-poc/evidence/02-negative-transfer.*` |
+| VULN-2 | 거래내역 IDOR | Custom DAST script | — 라이브 스크립트 미포함(그래서 3/4) · 상세 `wsl-poc/evidence/03-idor-transaction-history.*` |
+| VULN-3 | 사용자 정보 변경 IDOR | Custom DAST script | ✅ AWS 라이브(cmd `f36638de`) · 상세 `wsl-poc/evidence/04-idor-user-update.*` |
+| VULN-4 | PHP webshell upload/RCE | Custom DAST script | ✅ AWS 라이브(cmd `f36638de`) · 상세 `wsl-poc/evidence/05-*`, `06-*` |
 
 ## Current measured CI evidence
 
