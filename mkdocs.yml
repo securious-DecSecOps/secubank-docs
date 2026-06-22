@@ -94,10 +94,19 @@ extra:
   generator: false
 
 nav:
-  - 개요: index.md
-  - 기술 블로그: overview.md
-  - 왜 DevSecOps인가 (동인·정량효과): why-devsecops.md
-  - 보안 강화 조치 (워크로드 하드닝): security-hardening.md
+  - 시작하기:
+    - 개요: index.md
+    - 기술 블로그: overview.md
+    - 왜 DevSecOps인가 (동인·정량효과): why-devsecops.md
+    - 아키텍처: architecture.md
+    - 유스케이스로 본 시스템: usecases.md
+  - 보안 통제 원리:
+    - 보안 도구 원리: security-tools.md
+    - CI 보안 파이프라인: ci-security-pipeline.md
+    - 보안 시나리오: security-scenarios.md
+    - 탐지 효능(정탐/오탐): detection-efficacy.md
+    - 공급망 방어: supply-chain-defense.md
+    - 런타임 보안: runtime-security.md
   - 실전 교본:
     - 교본 개요: textbook/index.md
     - 1화 · 그거 어디서 돌릴 건데요?: textbook/01-infra.md
@@ -114,25 +123,22 @@ nav:
     - 12화 · 웹쉘이 떴는데 아무도 몰랐어요: textbook/12-falco.md
     - 13화 · 보안팀은 이걸 어디서 봐요?: textbook/13-defectdojo.md
     - 에필로그 · 그래서, axios를 막나요?: textbook/99-epilogue.md
-  - 아키텍처: architecture.md
-  - 유스케이스로 본 시스템: usecases.md
-  - 보안 도구 원리: security-tools.md
-  - CI 보안 파이프라인: ci-security-pipeline.md
-  - 보안 시나리오: security-scenarios.md
-  - 탐지 효능(정탐/오탐): detection-efficacy.md
-  - 공급망 방어: supply-chain-defense.md
-  - 증적 재현 런북: reproduce.md
-  - 운영자 런북(접속·로그·연동): operator-runbook.md
-  - 실습 가이드 · CI 하나하나 보기: handson-ci.md
-  - 구축·연결 원리 (end-to-end): build-wiring.md
-  - 런타임 보안: runtime-security.md
-  - 기술 심화 · k3s 컨트롤플레인·Cilium: deep-dive-k3s-cilium.md
-  - 기술 심화 · CI 파이프라인 원리: deep-dive-ci.md
-  - 기술 심화 · 메커니즘 해부 & 장애 복기: deep-dive-mechanisms.md
-  - 증적 & Triage: evidence-triage.md
-  - 예외·오탐 처리 구조: exception-handling.md
-  - ISMS-P 매핑: isms-p-mapping.md
-  - 도입 가이드(온프레·하이브리드): adoption.md
-  - 도입 시나리오(CI/CD 온보딩): onboarding-scenario.md
-  - 코드·설정 맵: code-map.md
-  - 한계 및 향후 과제: limitations.md
+  - 조치·증적:
+    - 보안 강화 조치 (워크로드 하드닝): security-hardening.md
+    - 증적 & Triage: evidence-triage.md
+    - 예외·오탐 처리 구조: exception-handling.md
+  - 운영·도입:
+    - 도입 가이드(온프레·하이브리드): adoption.md
+    - 도입 시나리오(CI/CD 온보딩): onboarding-scenario.md
+    - 구축·연결 원리 (end-to-end): build-wiring.md
+    - 운영자 런북(접속·로그·연동): operator-runbook.md
+    - 실습 가이드 · CI 하나하나 보기: handson-ci.md
+    - 증적 재현 런북: reproduce.md
+  - 기술 심화:
+    - k3s 컨트롤플레인·Cilium: deep-dive-k3s-cilium.md
+    - CI 파이프라인 원리: deep-dive-ci.md
+    - 메커니즘 해부 & 장애 복기: deep-dive-mechanisms.md
+    - 코드·설정 맵: code-map.md
+  - 평가·한계:
+    - ISMS-P 매핑: isms-p-mapping.md
+    - 한계 및 향후 과제: limitations.md
