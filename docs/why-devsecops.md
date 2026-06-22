@@ -106,6 +106,7 @@
 
 ## 더 읽기
 
+- [보안 강화 조치](security-hardening.md) — 위 통제들을 실제로 *어떻게* 적용했는지(무엇을·어떻게·증거).
 - [도입 가이드](adoption.md) — 배포 모델(AWS·온프레·하이브리드)과 단계별 도입 로드맵.
 - [Detection Efficacy](detection-efficacy.md) — SAST→DAST recall, 도구 커버리지 매트릭스, 정탐/오탐 프레임.
 - [CI Security Pipeline](ci-security-pipeline.md) — 6종 스캐너·SBOM·Security Gate의 동작과 'how'.
