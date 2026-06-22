@@ -50,7 +50,7 @@
 }
 
 /* ---------- typography ---------- */
-.md-typeset { font-size: .82rem; line-height: 1.7; color: var(--sb-ink-2); }
+.md-typeset { font-size: .9rem; line-height: 1.7; color: var(--sb-ink-2); }
 .md-typeset h1, .md-typeset h2, .md-typeset h3, .md-typeset h4 { color: var(--sb-ink); font-weight: 700; letter-spacing: -0.018em; }
 .md-typeset h1 { font-weight: 800; }
 .md-typeset h2 { margin-top: 2.4em; }
