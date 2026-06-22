@@ -265,3 +265,35 @@ ul.sb-driver > li {
   .sb-driver__arrow { height: 1rem; }
   .sb-driver__arrow::before { content: "\2193"; }
 }
+
+/* =========================================================================
+   미세 폴리시 (append-only) — 기존 토큰만 사용, '여백 에디토리얼' 톤 유지.
+   앵커 정렬 · 선택색 · 포커스 가시성(a11y) · 데이터 표 zebra · 인용블록 accent.
+   라이트/slate 양쪽 동작(토큰·color-mix). 기존 클래스 재정의 없음.
+   ========================================================================= */
+html { scroll-behavior: smooth; }
+/* 목차/퍼머링크로 점프할 때 헤딩이 상단 sticky 탭바에 가리지 않도록 */
+.md-typeset :is(h1, h2, h3, h4, h5, h6)[id] { scroll-margin-top: 5rem; }
+
+/* 텍스트 선택 — 단일 블루 accent */
+::selection { background: var(--sb-accent); color: #fff; }
+
+/* 키보드 포커스 가시성(접근성) */
+.md-typeset a:focus-visible,
+.md-nav__link:focus-visible,
+.md-button:focus-visible,
+.md-search__input:focus-visible {
+  outline: 2px solid var(--sb-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* 데이터 표 — 아주 옅은 zebra(헤더보다 연하게)로 행 추적성 향상 */
+.md-typeset table:not([class]) tbody tr:nth-child(2n) td {
+  background: color-mix(in srgb, var(--sb-bg-2) 55%, transparent);
+}
+
+/* 인용 블록 — accent 좌측선(에디토리얼 톤) */
+.md-typeset blockquote {
+  border-left: 3px solid color-mix(in srgb, var(--sb-accent) 35%, var(--sb-border));
+}
