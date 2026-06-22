@@ -96,6 +96,7 @@ extra:
 nav:
   - 개요: index.md
   - 기술 블로그: overview.md
+  - 왜 DevSecOps인가 (동인·정량효과): why-devsecops.md
   - 실전 교본:
     - 교본 개요: textbook/index.md
     - 1화 · 그거 어디서 돌릴 건데요?: textbook/01-infra.md

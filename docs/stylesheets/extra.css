@@ -200,3 +200,68 @@
 .md-typeset .sb-kpis > li > b { display: block; font-size: 1.55rem; font-weight: 800; color: var(--sb-ink); letter-spacing: -.02em; line-height: 1.1; }
 .md-typeset .sb-kpis > li.is-accent > b { color: var(--sb-accent); }
 .md-typeset .sb-kpis > li > span { display: block; margin-top: .35rem; font-size: .76rem; color: var(--sb-muted); line-height: 1.45; }
+
+/* =========================================================================
+   .sb-driver — "Before pain → 규제 노출 → 우리 통제" 3단 매핑 카드
+   why-devsecops 비즈니스 프레이밍 전용. 기존 .sb-points(라벨+설명 2분할)로는
+   pain → exposure → control 의 방향성을 표현할 수 없어 한 행 매핑으로 추가한다.
+   ========================================================================= */
+ul.sb-driver {
+  list-style: none;
+  padding: 0;
+  margin: 1.2rem 0;
+  display: grid;
+  gap: 0.75rem;
+}
+ul.sb-driver > li {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: stretch;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--sb-accent, #2f6bff) 16%, transparent);
+  border-radius: var(--sb-radius, 14px);
+  background: color-mix(in srgb, var(--sb-accent, #2f6bff) 4%, var(--md-default-bg-color));
+  box-shadow: var(--sb-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06));
+}
+.sb-driver__pain,
+.sb-driver__reg,
+.sb-driver__ctl {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+.sb-driver .sb-driver__k {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--md-default-fg-color) 55%, transparent);
+}
+.sb-driver__ctl {
+  padding: 0.55rem 0.65rem;
+  margin: -0.2rem 0;
+  border-radius: calc(var(--sb-radius, 14px) - 6px);
+  background: color-mix(in srgb, var(--sb-accent, #2f6bff) 10%, transparent);
+}
+.sb-driver__ctl .sb-driver__k {
+  color: var(--sb-accent, #2f6bff);
+}
+.sb-driver__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--sb-accent, #2f6bff) 60%, transparent);
+  font-weight: 700;
+}
+.sb-driver__arrow::before { content: "\2192"; }
+
+@media screen and (max-width: 59.9375em) {
+  ul.sb-driver > li {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+  .sb-driver__arrow { height: 1rem; }
+  .sb-driver__arrow::before { content: "\2193"; }
+}
