@@ -14,35 +14,35 @@
 
 <ul class="sb-driver">
 <li>
-<div class="sb-driver__pain"><span class="sb-driver__k">Before pain</span><span markdown>**수작업 병목** — 릴리스 끝물에 1~2명이 손으로 보안 검토. 사람과 피로도에 따라 깊이가 들쭉날쭉하다.</span></div>
+<div class="sb-driver__pain"><span class="sb-driver__k">Before pain</span><span><strong>수작업 병목</strong> — 릴리스 끝물에 1~2명이 손으로 보안 검토. 사람과 피로도에 따라 깊이가 들쭉날쭉하다.</span></div>
 <div class="sb-driver__arrow"></div>
 <div class="sb-driver__reg"><span class="sb-driver__k">규제 노출</span><span markdown>ISMS-P 2.8의 '반복가능 통제'가 즉흥 판단으로 충족된다.</span></div>
 <div class="sb-driver__arrow"></div>
 <div class="sb-driver__ctl"><span class="sb-driver__k">우리 통제</span><span markdown>shift-left CI에서 6종 스캐너가 매 빌드 자동 검사.</span></div>
 </li>
 <li>
-<div class="sb-driver__pain"><span class="sb-driver__k">Before pain</span><span markdown>**배포 후 재평가 부재** — 빌드 시점 1회 스캔 뒤 방치. "방금 공개된 라이브러리를 쓰는 배포본이 무엇이냐"에 즉답하지 못한다.</span></div>
+<div class="sb-driver__pain"><span class="sb-driver__k">Before pain</span><span><strong>배포 후 재평가 부재</strong> — 빌드 시점 1회 스캔 뒤 방치. "방금 공개된 라이브러리를 쓰는 배포본이 무엇이냐"에 즉답하지 못한다.</span></div>
 <div class="sb-driver__arrow"></div>
 <div class="sb-driver__reg"><span class="sb-driver__k">규제 노출</span><span markdown>주기 점검(연/반기) 사이 구간의 노출이 미상으로 남는다.</span></div>
 <div class="sb-driver__arrow"></div>
 <div class="sb-driver__ctl"><span class="sb-driver__k">우리 통제</span><span markdown>SBOM 보관 + 신규 CVE feed 재스캔으로 시간축 재평가.</span></div>
 </li>
 <li>
-<div class="sb-driver__pain"><span class="sb-driver__k">Before pain</span><span markdown>**감사 증적 산재** — finding이 스프레드시트·스캐너 UI·이메일·누군가의 노트북에 흩어져 있다. 감사 때 며칠을 재구성에 쓴다.</span></div>
+<div class="sb-driver__pain"><span class="sb-driver__k">Before pain</span><span><strong>감사 증적 산재</strong> — finding이 스프레드시트·스캐너 UI·이메일·누군가의 노트북에 흩어져 있다. 감사 때 며칠을 재구성에 쓴다.</span></div>
 <div class="sb-driver__arrow"></div>
 <div class="sb-driver__reg"><span class="sb-driver__k">규제 노출</span><span markdown>증적의 출처·완전성을 입증하기 어렵다.</span></div>
 <div class="sb-driver__arrow"></div>
 <div class="sb-driver__ctl"><span class="sb-driver__k">우리 통제</span><span markdown>DefectDojo 단일 집계 + evidence-map 자동 아카이브.</span></div>
 </li>
 <li>
-<div class="sb-driver__pain"><span class="sb-driver__k">Before pain</span><span markdown>**느리고 공포에 찬 배포** — 수작업·늦은 검토 탓에 크고 드문 배포. 큰 diff = 고위험 = 검토가 더 느려지는 악순환.</span></div>
+<div class="sb-driver__pain"><span class="sb-driver__k">Before pain</span><span><strong>느리고 공포에 찬 배포</strong> — 수작업·늦은 검토 탓에 크고 드문 배포. 큰 diff = 고위험 = 검토가 더 느려지는 악순환.</span></div>
 <div class="sb-driver__arrow"></div>
 <div class="sb-driver__reg"><span class="sb-driver__k">규제 노출</span><span markdown>전자금융 변경관리에서 변경 단위·승인 추적이 흐려진다.</span></div>
 <div class="sb-driver__arrow"></div>
 <div class="sb-driver__ctl"><span class="sb-driver__k">우리 통제</span><span markdown>GitOps 작은 배포 + 게이트가 변경 전 자동 검사.</span></div>
 </li>
 <li>
-<div class="sb-driver__pain"><span class="sb-driver__k">Before pain</span><span markdown>**런타임·제로트러스트 부재** — 배포 후 행위 탐지·egress 통제가 없다. 침해된 파드가 C2를 호출하거나 측면 이동해도 보이지 않는다.</span></div>
+<div class="sb-driver__pain"><span class="sb-driver__k">Before pain</span><span><strong>런타임·제로트러스트 부재</strong> — 배포 후 행위 탐지·egress 통제가 없다. 침해된 파드가 C2를 호출하거나 측면 이동해도 보이지 않는다.</span></div>
 <div class="sb-driver__arrow"></div>
 <div class="sb-driver__reg"><span class="sb-driver__k">규제 노출</span><span markdown>배포 이후 행위 증적의 공백.</span></div>
 <div class="sb-driver__arrow"></div>
