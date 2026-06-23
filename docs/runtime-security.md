@@ -72,4 +72,27 @@ Default-deny 정책은 보안적으로 필요하지만, MSA 통신을 쉽게 깨
 4. DAST와 verify script 재실행
 5. production-like 환경에 단계적 적용
 
-현재 문서 기준으로 CiliumNetworkPolicy의 완전 강제 적용과 evidence는 TODO다.
+CNP의 완전 강제(전 네임스페이스 default-deny·L7)는 여전히 TODO지만, 핵심 통제들이 *실제로 작동하는지*는 아래처럼 로컬에서 반증 가능하게 실증했다.
+
+## 라이브 실증 — 로컬 kind 클러스터 (2026-06)
+
+AWS 환경이 내려가 있는 동안(비용 0 유지), 위 통제들이 작동하는지를 로컬 kind 클러스터(WSL2 · Cilium 1.16 · Kyverno · Falco modern_ebpf)에서 검증했다. **이건 메커니즘 실증이지 프로덕션 규모나 AWS 배포의 증명이 아니다.** CI 게이트는 여전히 관측 모드(report-only)이며, 여기서 닫은 것은 *클러스터 admission·런타임* 계층이다.
+
+| 통제 | 라이브 증거 | 반증 (정책 OFF) |
+| --- | --- | --- |
+| **PSA restricted enforce** | root Pod → `violates PodSecurity "restricted"` 거부 / 하드닝 Pod는 admit·Running | 라벨 제거 시 root Pod 통과 |
+| **Cosign verifyImages enforce** | 미서명 이미지 → `no matching signatures` 거부 / 서명 이미지 admit | 정책 미적용 ns에서 통과 |
+| **Cilium egress DROP** | 웹쉘의 외부 콜아웃 → Hubble `… <> 1.1.1.1:80 (world) Policy denied DROPPED (SYN)` | 정책 ON↔OFF로 DROP↔통과 전환 |
+| **Falco 탐지** | `cat /etc/shadow` → `Read sensitive file`(T1555) / 웹쉘 셸 spawn → 커스텀 룰(T1059) | — |
+
+### 풀 체인 — V4 웹쉘에 대한 다층 응답
+
+의도적으로 심은 취약 워크로드(file-service)를 하드닝 배포한 뒤 실제 침해를 재현했다.
+
+1. 하드닝 file-service(non-root 10001 · ro-rootfs · drop ALL · seccomp)가 **restricted enforce 네임스페이스에서 정상 기동** — 하드닝이 앱을 깨지 않음을 확인.
+2. 웹쉘 업로드 → HTTP 실행 → **RCE 확인**(`id` → `uid=10001`).
+3. RCE가 **non-root**로 실행돼 `/etc/shadow` 읽기 차단 — 침해돼도 크리덴셜 접근 불가(blast radius 축소).
+4. 웹쉘의 외부 콜아웃 → **Cilium이 DROP**(Hubble) — C2/exfil 불가.
+5. 셸 spawn → **Falco 탐지**(T1059). *주: kind/WSL2 modern_ebpf는 BPF iterators가 비활성이라 부모-프로세스 계보가 불안정 → 부모명 대신 "앱 워크로드에서 셸 spawn = 이상"이라는 워크로드 정체성으로 룰을 설계했다.*
+
+→ 단일 통제가 아니라 **하드닝 · 네트워크 봉쇄 · 런타임 탐지가 상호작용**해 침해를 봉쇄하고 가시화하는 것을 라이브로 보였다. CNP 완전 강제, 더 많은 시나리오, AWS 환경에서의 동일 재검증은 다음 과제다.

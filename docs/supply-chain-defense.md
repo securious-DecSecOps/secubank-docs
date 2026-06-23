@@ -29,7 +29,7 @@
 | 〃 (시간이 지나 advisory 등재) | **SBOM 지속 재평가** (`cve-rescan-pipeline`) | ✅ 저장된 SBOM을 갱신된 feed로 재스캔 → "우리가 그 버전 썼나?" 즉시 식별. **axios류는 며칠 내 GHSA 등재 → 재평가로 포착** | ✅(설계)/🟡(자동화 진행) |
 | **하드코딩/유출 시크릿** | Gitleaks | ✅ 소스 커밋 단계 시크릿 차단(공격자의 탈취 대상 축소) | ✅ |
 | **CI 파이프라인 침해** (TanStack형) | Jenkins 격리 + PAT 최소권한 + GitOps(Git=단일 진실) + 빌드 증적 | 🟡 빌드 변조 탐지·추적엔 유리하나, **CI 자체 침해 방지엔 추가 하드닝 필요**(서명된 커밋, OIDC, 빌드 출처) | 🟡 |
-| **미신뢰 이미지가 배포됨** | **Cosign 서명 + Kyverno verifyImages** | ▢ 서명된 신뢰 아티팩트만 배포 허용 → 변조/미서명 이미지 차단 (**공급망 무결성의 핵심 통제**) | ▢ **planned** |
+| **미신뢰 이미지가 배포됨** | **Cosign 서명 + Kyverno verifyImages** | 🟡 **검증 메커니즘 로컬 실증** — verifyImages Enforce가 미서명 이미지를 admission에서 거부(반증 포함). 단 *우리 이미지*의 CI 서명 미구현이라 신뢰 아티팩트 공급은 다음 단계 | 🟡 **메커니즘 실증/서명 미구현** |
 | **페이로드 실행 → 외부 C2/exfil** | **Cilium egress 차단(default-deny)** | ✅ **가장 강력한 보완통제**: 악성 코드가 빌드를 통과해도 **외부 통신을 막아 RAT C2·credential exfil 무력화**. axios RAT·node-ipc 탈취의 *효과*를 런타임에서 차단 | ✅(구현)/🟡(default-deny 수동적용) |
 | **페이로드의 비정상 프로세스** | Falco | ✅ node/php에서 셸 spawn·의심 syscall 탐지 → 행위 기반 경보 | ✅ |
 | **증적·triage** | DefectDojo | ✅ finding 통합·SLA·VEX | 🟡(import 동작) |
@@ -40,10 +40,10 @@
 
 1. **빌드 시점(SCA)은 known-bad만.** axios가 침해된 그 순간엔 advisory가 없어 Trivy가 못 잡는다. → SCA를 "공급망 1차 방어"로 과신하면 안 된다.
 2. **시간축 방어(SBOM 재평가)가 진짜 무기.** advisory가 며칠 내 등재되면, **저장된 SBOM을 재스캔**해 "우리 배포본이 axios@1.14.1을 쓰는가"를 즉시 답한다. = "배포 시점 1회 검사"가 아니라 **지속 재평가**. (이게 이 프로젝트의 #2 시나리오)
-3. **런타임 egress 차단(Cilium)이 최후·최강 보완.** 악성 의존성이 모든 빌드 검사를 통과해 배포돼도, **외부로 못 나가면 RAT C2도 credential exfil도 실패**한다. 이건 *지금 구현돼 있고* 실증 가능 — VulnBank에 default-deny + allow 화이트리스트를 적용하면 "백엔드 파드의 외부 통신 차단"을 Hubble DROPPED로 보일 수 있다.
-4. **이미지 서명(Cosign/Kyverno)은 무결성의 정공법** — 단 현재 planned. TanStack형 CI 침해·이미지 변조를 정면 차단하려면 이게 필요. **로드맵 최우선 보강 후보.**
+3. **런타임 egress 차단(Cilium)이 최후·최강 보완.** 악성 의존성이 모든 빌드 검사를 통과해 배포돼도, **외부로 못 나가면 RAT C2도 credential exfil도 실패**한다. 이건 *지금 구현돼 있고* **로컬 kind에서 실증**했다 — file-service 웹쉘의 외부 콜아웃(1.1.1.1)이 Hubble에서 DROPPED로 잡혔다([Runtime Security · 라이브 실증](runtime-security.md)).
+4. **이미지 서명(Cosign/Kyverno)은 무결성의 정공법** — 검증 메커니즘(verifyImages Enforce)은 **로컬에서 실증**(미서명 거부)했지만, *우리 이미지*의 CI `cosign sign`·SLSA는 미구현. CI 침해·이미지 변조를 정면 차단하려면 서명 자체가 선결. **로드맵 최우선 보강 후보.**
 
-→ **요약**: "axios/Shai-Hulud를 막느냐?" → 침해의 *순간*은 못 막는다(예방 실패). 대신 **빌드(SCA known) + 시간(SBOM 재평가) + 런타임(Cilium egress·Falco) 3겹으로 *탐지하고 피해를 봉쇄*하며, 무결성 정면 차단(Cosign/Kyverno)은 다음 보강이다.** 단일 도구가 아니라 계층이 답이라는 것 자체가 evidence-driven 메시지.
+→ **요약**: "axios/Shai-Hulud를 막느냐?" → 침해의 *순간*은 못 막는다(예방 실패). 대신 **빌드(SCA known) + 시간(SBOM 재평가) + 런타임(Cilium egress·Falco) 3겹으로 *탐지하고 피해를 봉쇄*하며, 무결성 정면 차단(Cosign/Kyverno)은 *메커니즘은 로컬 실증·우리 이미지 서명은 다음 보강*이다.** 단일 도구가 아니라 계층이 답이라는 것 자체가 evidence-driven 메시지.
 
 ## 4. 실증 가능성 (이론 아님)
 
